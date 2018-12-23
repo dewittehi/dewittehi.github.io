@@ -3,7 +3,8 @@
 ### Mijn proefschrift en verdediging:
 1. Een [link](/proefschrift Jonne Sikkens.pdf) naar mijn proefschrift, getiteld "The role of behaviour in antimicrobial prescribing; are we only human after all?"
 
-    [![cover proefschrift](/20181219 Cover proefschrift groot.jpg =300x)](/proefschrift Jonne Sikkens.pdf)
+    [<img src="20181219 Cover proefschrift groot.jpg" alt="cover proefschrift" width="300"/>](/proefschrift Jonne Sikkens.pdf)
+    <!-- [![cover proefschrift](/20181219 Cover proefschrift groot.jpg =300x)](/proefschrift Jonne Sikkens.pdf)-->
 
 2. Een [link](Uitnodiging promotie en borrel.pdf) naar de uitnodiging voor de promotie op 24 januari 2019 11.45u en de borrel op 26 januari 20.30u
 
