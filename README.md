@@ -11,4 +11,4 @@
 
 3. De rekentool ['Bayes Basic'](https://jonne.shinyapps.io/BayesBasic/) voor het berekenen van achterafkansen in diagnostische situaties
 4. Een [link](https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch") naar mijn wetenschappelijke publicaties op PubMed
-5. Een [link]("https://www.linkedin.com/in/jonnesikkens/") naar mijn LinkedIn profiel
+5. Een [link](https://www.linkedin.com/in/jonnesikkens/) naar mijn LinkedIn profiel
