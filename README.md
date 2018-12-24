@@ -12,5 +12,5 @@
 
 3. De rekentool ['Bayes Basic'](https://jonne.shinyapps.io/BayesBasic/) voor het berekenen van achterafkansen in diagnostische situaties
 4. De rekentool ['Bayes Reversed'](https://jonne.shinyapps.io/BayesReverse/) voor het berekenen van negatieve testpercentages op basis van het aantal maximaal te missen zieke mensen. Gebaseerd op mijn ['artikel'](https://https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891) in PlosOne.
-5.. Een [link](https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch) naar mijn wetenschappelijke publicaties op PubMed
+5. Een [link](https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch) naar mijn wetenschappelijke publicaties op PubMed
 6. Een [link](https://www.linkedin.com/in/jonnesikkens/) naar mijn LinkedIn profiel
