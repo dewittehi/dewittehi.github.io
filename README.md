@@ -1,4 +1,4 @@
-<!-- # Welkom op de persoonlijke site van Jonne Sikkens -->
+<!-- # Welkom op de persoonlijke site van Jonne Sikkens. U kunt hier het volgende vinden: -->
 
 ### Mijn proefschrift en verdediging:
 1. Een [link](/proefschrift Jonne Sikkens.pdf) naar mijn proefschrift, getiteld "The role of behaviour in antimicrobial prescribing; are we only human after all?"
