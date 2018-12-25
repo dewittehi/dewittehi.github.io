@@ -23,7 +23,7 @@
 <body>
  <div class="row">
   <div class="column">
-    <h2>Mijn proefschrift en verdediging:</h2>
+    <h2>Mijn proefschrift en verdediging</h2>
 <p> 1. Een <a href="proefschrift Jonne Sikkens.pdf" target="_blank">link</a> naar mijn proefschrift, getiteld "The role of behaviour in antimicrobial prescribing; are we only human after all?"</p>
 <a href="proefschrift Jonne Sikkens.pdf" target="_blank">
     <img src="20181219 Cover proefschrift groot.jpg" alt="cover proefschrift" style="width:300px;height:auto;"> 
@@ -31,7 +31,7 @@
 <p>2. Een <a href="Uitnodiging promotie en borrel.pdf" target="_blank">link</a> naar de uitnodiging voor de promotie op 24 januari 2019 11.45u en de borrel op 26 januari 20.30u</p>
 </div>
   <div class="column">
-    <h2>Overige interessante dingen:</h2>
+    <h2>Overige interessante dingen</h2>
 <p>3. De rekentool <a href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">Bayes Basic</a> voor het berekenen van achterafkansen in diagnostische situaties</p>
 <p>4. De rekentool <a href="https://jonne.shinyapps.io/BayesReverse/" target="_blank">Bayes Reversed</a> voor het berekenen van negatieve testpercentages op basis van het aantal maximaal te missen zieke mensen. Gebaseerd op mijn <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891" target="_blank">artikel</a> in PlosOne (geschreven samen met o.a. mijn vrouw Djoeke).</p>
 <p>5. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed</p>
