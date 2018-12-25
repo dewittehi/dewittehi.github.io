@@ -10,6 +10,6 @@
 
 ### Overige interessante dingen
 3. De rekentool <a href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">'Bayes Basic'</a> voor het berekenen van achterafkansen in diagnostische situaties
-4. De rekentool <a href="https://jonne.shinyapps.io/BayesReverse/" target="_blank">'Bayes Reversed'</a> voor het berekenen van negatieve testpercentages op basis van het aantal maximaal te missen zieke mensen. Gebaseerd op mijn ['artikel'](https://https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891) (samen met o.a. mijn vrouw Djoeke) in PlosOne.
+4. De rekentool <a href="https://jonne.shinyapps.io/BayesReverse/" target="_blank">'Bayes Reversed'</a> voor het berekenen van negatieve testpercentages op basis van het aantal maximaal te missen zieke mensen. Gebaseerd op mijn ['artikel'](https://https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891) in PlosOne (geschreven samen met o.a. mijn vrouw Djoeke).
 5. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed
 6. Een <a href="https://www.linkedin.com/in/jonnesikkens/" target="_blank">link</a> naar mijn LinkedIn profiel
