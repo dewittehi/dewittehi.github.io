@@ -21,7 +21,6 @@
 </style>
 </head>  
 <body>
-<h1>Welkom op de persoonlijke site van Jonne Sikkens</h1>
  <div class="row">
   <div class="column">
     <h2>Mijn proefschrift en verdediging:</h2>
