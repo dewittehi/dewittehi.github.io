@@ -20,10 +20,10 @@
 }
 </style>
 </head>  
-<body bgcolor="#e0ebeb">
+<body>
 <h1>Welkom op de persoonlijke site van Jonne Sikkens</h1>
  <div class="row">
-  <div class="column" style="background-color:#ffffff;">
+  <div class="column">
     <h2>Mijn proefschrift en verdediging:</h2>
 <p> 1. Een <a href="proefschrift Jonne Sikkens.pdf" target="_blank">link</a> naar mijn proefschrift, getiteld "The role of behaviour in antimicrobial prescribing; are we only human after all?"</p>
 <a href="proefschrift Jonne Sikkens.pdf" target="_blank">
@@ -31,7 +31,7 @@
 </a>
 <p>2. Een <a href="Uitnodiging promotie en borrel.pdf" target="_blank">link</a> naar de uitnodiging voor de promotie op 24 januari 2019 11.45u en de borrel op 26 januari 20.30u</p>
 </div>
-  <div class="column" style="background-color:#ffffff;">
+  <div class="column">
     <h2>Overige interessante dingen:</h2>
 <p>3. De rekentool <a href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">'Bayes Basic'</a> voor het berekenen van achterafkansen in diagnostische situaties</p>
 <p>4. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed</p>
