@@ -33,7 +33,8 @@
 </div>
   <div class="column">
     <h2>Overige interessante dingen:</h2>
-<p>3. De rekentool <a href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">'Bayes Basic'</a> voor het berekenen van achterafkansen in diagnostische situaties</p>
-<p>4. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed</p>
-<p>5. Een <a href="https://www.linkedin.com/in/jonnesikkens/" target="_blank">link</a> naar mijn LinkedIn profiel</p>
+<p>3. De rekentool <a href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">Bayes Basic</a> voor het berekenen van achterafkansen in diagnostische situaties</p>
+<p>4. De rekentool <a href="https://jonne.shinyapps.io/BayesReverse/" target="_blank">Bayes Reversed</a> voor het berekenen van negatieve testpercentages op basis van het aantal maximaal te missen zieke mensen. Gebaseerd op mijn <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891" target="_blank">artikel</a> in PlosOne (geschreven samen met o.a. mijn vrouw Djoeke).</p>
+<p>5. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed</p>
+<p>6. Een <a href="https://www.linkedin.com/in/jonnesikkens/" target="_blank">link</a> naar mijn LinkedIn profiel</p>
   </div>
