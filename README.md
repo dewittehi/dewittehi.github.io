@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
     
     <head>
@@ -38,5 +37,3 @@
 <p>4. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed</p>
 <p>5. Een <a href="https://www.linkedin.com/in/jonnesikkens/" target="_blank">link</a> naar mijn LinkedIn profiel</p>
   </div>
-</body>
-</html>
