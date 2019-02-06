@@ -21,6 +21,7 @@
 </style>
 </head>  
 <body>
+<img src="20190124 Jonne Promotie 055.jpg" alt="verdediging" style="width 900px;height:auto;">
  <div class="row">
   <div class="column">
     <h2>Mijn proefschrift en verdediging</h2>
