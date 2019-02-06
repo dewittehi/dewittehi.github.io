@@ -29,8 +29,9 @@
 <a href="proefschrift Jonne Sikkens.pdf" target="_blank">
     <img src="20181219 Cover proefschrift groot.jpg" alt="cover proefschrift" style="width:300px;height:auto;"> 
 </a>
-<p>2. De verdediging heeft inmiddels succesvol plaatsgevonden op 24 januari. Iedereen dank voor alle steun en aanwezigheid!</p>
+<p>2. De verdediging heeft inmiddels succesvol plaatsgevonden op 24 januari. Iedereen dank voor alle steun en aanwezigheid! Zie hieronder een foto en een filmpje van mijn lekenpraatje, voor wie het gemist heeft of wil terugkijken.</p>
 <img src="20190124 Jonne Promotie 066.jpg" alt="proost!" style="width:300px;height:auto;">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1f3OyCzw0ec" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
   <div class="column">
     <h2>Overige interessante dingen</h2>
