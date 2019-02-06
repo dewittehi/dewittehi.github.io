@@ -21,7 +21,7 @@
 </style>
 </head>  
 <body>
-<img src="20190124 Jonne Promotie 055.jpg" alt="verdediging" style="width 900px;height:auto;">
+<img src="20190124 Jonne Promotie 055.jpg" alt="verdediging" style="width 1000px;height:auto;">
  <div class="row">
   <div class="column">
     <h2>Mijn proefschrift en verdediging</h2>
@@ -30,6 +30,7 @@
     <img src="20181219 Cover proefschrift groot.jpg" alt="cover proefschrift" style="width:300px;height:auto;"> 
 </a>
 <p>2. De verdediging heeft inmiddels succesvol plaatsgevonden op 24 januari. Iedereen dank voor alle steun en aanwezigheid!</p>
+<img src="20190124 Jonne Promotie 066.jpg" alt="proost!" style="width:300px;height:auto;">
 </div>
   <div class="column">
     <h2>Overige interessante dingen</h2>
