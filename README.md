@@ -28,7 +28,7 @@
 <a href="proefschrift Jonne Sikkens.pdf" target="_blank">
     <img src="20181219 Cover proefschrift groot.jpg" alt="cover proefschrift" style="width:300px;height:auto;"> 
 </a>
-<p>2. Een <a href="Uitnodiging promotie en borrel.pdf" target="_blank">link</a> naar de uitnodiging voor de promotie op 24 januari 2019 11.45u en de borrel op 26 januari 20.30u</p>
+<p>2. De verdediging heeft inmiddels succesvol plaatsgevonden op 24 januari. Iedereen dank voor alle steun en aanwezigheid!</p>
 </div>
   <div class="column">
     <h2>Overige interessante dingen</h2>
