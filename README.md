@@ -21,7 +21,7 @@
 </style>
 </head>  
 <body>
-<img src="IMG_1505.jpeg" style="width 300px;height:auto;">
+<img src="IMG_1505.jpeg" style="width 200px;height:auto;">
  <div class="row">
   <div class="column">
     <h2>Al even geleden maar niet minder leuk: mijn proefschrift</h2>
@@ -30,7 +30,7 @@
     <img src="20181219 Cover proefschrift groot.jpg" alt="cover proefschrift" style="width:300px;height:auto;"> 
 </a>
 <p>2. Zie hieronder een filmpje van mijn lekenpraatje.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/1f3OyCzw0ec" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="200" height="118" src="https://www.youtube.com/embed/1f3OyCzw0ec" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
   <div class="column">
     <h2>Waar ik nu o.a. mee bezig ben:</h2>
