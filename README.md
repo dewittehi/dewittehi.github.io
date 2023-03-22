@@ -40,6 +40,7 @@
 <p>3. De rekentool <a href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">Bayes Basic</a> voor het berekenen van achterafkansen in diagnostische situaties</p>
 <p>4. De rekentool <a href="https://jonne.shinyapps.io/BayesBasicPOCUSDVT/" target="_blank">Bayes Basic POCUS DVT</a> wat feitelijk Bayes' theorem is toegepast op mijn zoekvraag over POCUS voor diagnose van DVT van de onderste extremiteit.</p>
 <p>5. De rekentool <a href="https://jonne.shinyapps.io/BayesReverse/" target="_blank">Bayes Reversed</a> voor het berekenen van negatieve testpercentages op basis van het aantal maximaal te missen zieke mensen. Gebaseerd op mijn <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891" target="_blank">artikel</a> in PlosOne (geschreven samen met o.a. Djoeke Beekman).</p>
-<p>6. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed</p>
-<p>7. Een <a href="https://www.linkedin.com/in/jonnesikkens/" target="_blank">link</a> naar mijn LinkedIn profiel</p>
+<p>6. De rekentool <a href="https://jonne.shinyapps.io/Bayes_how_many_CTs/" target="_blank">relation between making more scans and scan positivity</a>, gebaseerd op Bayes theorem.
+<p>7. Een <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">link</a> naar mijn wetenschappelijke publicaties op PubMed</p>
+<p>8. Een <a href="https://www.linkedin.com/in/jonnesikkens/" target="_blank">link</a> naar mijn LinkedIn profiel</p>
 
