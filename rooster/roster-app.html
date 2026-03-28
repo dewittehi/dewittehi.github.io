@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rooster - Ziekenhuis Roosterplanner</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f3f4f6; color: #1f2937; line-height: 1.5;
+        }
+        :root {
+            --primary: #0d9488; --primary-hover: #0f766e; --primary-light: #ccfbf1;
+            --danger: #ef4444; --danger-hover: #dc2626; --danger-light: #fee2e2;
+            --success: #10b981; --success-light: #d1fae5;
+            --blue: #3b82f6; --blue-light: #dbeafe;
+            --amber: #f59e0b; --amber-light: #fef3c7;
+            --purple: #8b5cf6; --purple-light: #ede9fe;
+            --gray: #6b7280; --gray-light: #f3f4f6; --gray-border: #d1d5db;
+            --white: #ffffff; --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        #app-loading { display: flex; justify-content: center; align-items: center; min-height: 100vh; font-size: 1.2rem; color: var(--gray); }
+        .hidden { display: none !important; }
+        /* Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        .card { background: var(--white); border-radius: 0.5rem; box-shadow: var(--shadow); padding: 1.5rem; margin-bottom: 1rem; }
+        .flex { display: flex; } .flex-col { flex-direction: column; }
+        .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; } .gap-4 { gap: 1rem; }
+        .flex-wrap { flex-wrap: wrap; } .flex-1 { flex: 1; }
+        .grid { display: grid; }
+        .grid-5 { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+        /* Typography */
+        h1 { font-size: 1.75rem; font-weight: 700; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        h4 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .text-sm { font-size: 0.875rem; } .text-xs { font-size: 0.75rem; }
+        .text-gray { color: var(--gray); } .text-white { color: white; }
+        .text-center { text-align: center; } .font-bold { font-weight: 700; }
+        .mb-1 { margin-bottom: 0.25rem; } .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; }
+        .mt-2 { margin-top: 0.5rem; } .mt-4 { margin-top: 1rem; }
+        .mr-2 { margin-right: 0.5rem; } .ml-2 { margin-left: 0.5rem; }
+        .p-2 { padding: 0.5rem; } .p-4 { padding: 1rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .rounded { border-radius: 0.375rem; } .rounded-lg { border-radius: 0.5rem; }
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center;
+            padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 500;
+            cursor: pointer; border: none; font-size: 0.875rem; transition: all 0.15s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-purple { background: var(--purple); color: white; }
+        .btn-amber { background: var(--amber); color: white; }
+        .btn-gray { background: var(--gray-light); color: var(--gray); border: 1px solid var(--gray-border); }
+        .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.75rem; }
+        .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* Forms */
+        .input, select, textarea {
+            width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--gray-border);
+            border-radius: 0.375rem; font-size: 0.875rem; font-family: inherit;
+        }
+        .input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light);
+        }
+        label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; color: #374151; }
+        /* Navigation */
+        .navbar { background: var(--white); border-bottom: 1px solid var(--gray-border); padding: 0.75rem 1rem; box-shadow: var(--shadow); }
+        .nav-tabs { display: flex; gap: 0; border-bottom: 2px solid #e5e7eb; margin-bottom: 1rem; overflow-x: auto; }
+        .nav-tab { padding: 0.75rem 1rem; cursor: pointer; border-bottom: 2px solid transparent;
+            margin-bottom: -2px; font-weight: 500; font-size: 0.875rem; color: var(--gray);
+            white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; }
+        .nav-tab:hover { color: #1f2937; }
+        .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        /* Calendar */
+        .cal-header { font-weight: 700; text-align: center; padding: 0.5rem; color: #374151; font-size: 0.8rem; }
+        .cal-day { min-height: 70px; padding: 4px; border-radius: 0.375rem; cursor: pointer;
+            border: 2px solid var(--gray-border); background: var(--gray-light); font-size: 0.75rem;
+            position: relative; transition: all 0.15s; display: flex; flex-direction: column; }
+        .cal-day:hover { box-shadow: 0 0 0 2px var(--primary); }
+        .cal-day.available { background: var(--success-light); border-color: var(--success); }
+        .cal-day.unavailable { background: var(--danger-light); border-color: var(--danger); }
+        .cal-day.has-pref { background: var(--blue-light); border-color: var(--blue); }
+        .cal-day.holiday { background: var(--amber-light); border-color: var(--amber); cursor: default; }
+        .cal-day.holiday:hover { box-shadow: none; }
+        .cal-day.empty { border: none; background: transparent; cursor: default; min-height: 0; }
+        .cal-day.empty:hover { box-shadow: none; }
+        .cal-day-num { font-weight: 700; font-size: 0.85rem; }
+        .cal-day-label { font-size: 0.65rem; color: var(--gray); margin-top: 2px; line-height: 1.2; }
+        .cal-day-reason { font-size: 0.6rem; color: var(--danger); font-weight: 500; }
+        .cal-day-holiday { font-size: 0.6rem; color: #92400e; font-weight: 600; }
+        /* Roster calendar */
+        .roster-day { min-height: 80px; padding: 4px; border-radius: 0.375rem;
+            border: 1px solid var(--gray-border); background: var(--white); font-size: 0.7rem; }
+        .roster-day .task-badge { padding: 2px 4px; border-radius: 3px; margin-bottom: 2px;
+            font-size: 0.65rem; font-weight: 500; display: block; }
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal { background: var(--white); border-radius: 0.5rem; padding: 1.5rem;
+            width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        /* Badge */
+        .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 500; }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .badge-blue { background: var(--blue-light); color: var(--blue); }
+        .badge-amber { background: var(--amber-light); color: #92400e; }
+        /* Table */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th, td { padding: 0.4rem 0.5rem; border: 1px solid var(--gray-border); text-align: left; }
+        th { background: var(--gray-light); font-weight: 600; position: sticky; top: 0; }
+        td.avail-yes { background: var(--success-light); }
+        td.avail-no { background: var(--danger-light); }
+        td.avail-holiday { background: var(--amber-light); }
+        /* Task colors */
+        .task-c0 { background: #fef3c7; color: #92400e; }
+        .task-c1 { background: #e0e7ff; color: #3730a3; }
+        .task-c2 { background: #dbeafe; color: #1e40af; }
+        .task-c3 { background: #d1fae5; color: #065f46; }
+        .task-c4 { background: #fce7f3; color: #9d174d; }
+        .task-c5 { background: #ede9fe; color: #5b21b6; }
+        .task-c6 { background: #fed7aa; color: #9a3412; }
+        .task-c7 { background: #e5e7eb; color: #374151; }
+        /* Login */
+        .login-bg { min-height: 100vh; background: linear-gradient(135deg, #0d9488, #3b82f6);
+            display: flex; align-items: center; justify-content: center; padding: 1rem; }
+        .login-card { background: var(--white); border-radius: 0.75rem; padding: 2rem;
+            width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        /* Avail overview cell */
+        .avail-cell { width: 28px; height: 28px; display: inline-flex; align-items: center;
+            justify-content: center; border-radius: 3px; cursor: pointer; font-size: 0.6rem; font-weight: 600; }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-5 { gap: 2px; }
+            .cal-day { min-height: 50px; font-size: 0.65rem; }
+            .nav-tab { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+            .container { padding: 0.5rem; }
+        }
+        /* Recurrence list */
+        .recurrence-item { display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 0.75rem; background: var(--gray-light); border-radius: 0.375rem;
+            margin-bottom: 0.5rem; font-size: 0.85rem; }
+        /* Status message */
+        .status-msg { padding: 0.75rem 1rem; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.875rem; }
+        .status-success { background: var(--success-light); color: #065f46; }
+        .status-error { background: var(--danger-light); color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div id="app-loading">Laden...</div>
+
+    <!-- SUPABASE SETUP VIEW -->
+    <div id="view-setup" class="login-bg hidden">
+        <div class="login-card" style="max-width:500px;">
+            <div class="text-center mb-6">
+                <h1 style="color: var(--primary);">Ziekenhuis Rooster</h1>
+                <p class="text-gray">Database-configuratie</p>
+            </div>
+            <p class="text-sm mb-4">Verbind met je Supabase-project voor gedeelde data. Alle medewerkers gebruiken dezelfde configuratie.</p>
+            <div class="flex-col gap-4">
+                <div>
+                    <label>Supabase Project-URL</label>
+                    <input type="text" id="setup-url" class="input" placeholder="https://xxxxx.supabase.co">
+                </div>
+                <div>
+                    <label>Supabase Anon Key</label>
+                    <input type="text" id="setup-key" class="input" placeholder="eyJhbGci...">
+                </div>
+                <button class="btn btn-primary btn-lg" style="width:100%;" onclick="connectSupabase()">Verbinden</button>
+                <div id="setup-error" class="hidden" style="color:var(--danger); font-size:0.875rem;"></div>
+                <hr style="border-color:var(--gray-border);">
+                <button class="btn btn-gray" style="width:100%;" onclick="startOffline()">Zonder database starten (alleen lokaal)</button>
+                <p class="text-xs text-gray text-center">Lokale modus: data wordt alleen in deze browser opgeslagen en niet gedeeld.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="hidden">
+
+        <!-- LOGIN VIEW -->
+        <div id="view-login" class="login-bg hidden">
+            <div class="login-card">
+                <div class="text-center mb-6">
+                    <h1 style="color: var(--primary);">Ziekenhuis Rooster</h1>
+                    <p class="text-gray" id="login-year-label">2027 Planner</p>
+                </div>
+                <div class="flex-col gap-4">
+                    <div>
+                        <label for="login-name">Medewerker</label>
+                        <select id="login-name" class="input"></select>
+                    </div>
+                    <div>
+                        <label for="login-pass">Wachtwoord</label>
+                        <input type="password" id="login-pass" class="input" placeholder="Voer je wachtwoord in">
+                    </div>
+                    <button class="btn btn-primary btn-lg" style="width:100%;" onclick="doLogin()">Inloggen</button>
+                    <div id="login-error" class="text-center hidden" style="color:var(--danger); font-size:0.875rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN APP VIEW -->
+        <div id="view-main" class="hidden">
+            <!-- Navbar -->
+            <div class="navbar">
+                <div class="container flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <h1 style="color:var(--primary); font-size:1.3rem;" id="app-title">Ziekenhuis Rooster 2027</h1>
+                        <span class="badge badge-primary" id="user-badge"></span>
+                        <span class="badge badge-blue hidden" id="admin-badge">Beheerder</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="sync-indicator" class="text-xs" style="opacity:0.7;"></span>
+                        <button class="btn btn-gray" onclick="doLogout()">Uitloggen</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Tabs -->
+            <div class="container">
+                <div class="nav-tabs" id="main-tabs">
+                    <button class="nav-tab active" data-tab="avail" onclick="switchMainTab('avail')">Mijn Beschikbaarheid</button>
+                    <button class="nav-tab hidden" data-tab="admin" id="tab-admin" onclick="switchMainTab('admin')">Beheer</button>
+                    <button class="nav-tab hidden" data-tab="roster" id="tab-roster" onclick="switchMainTab('roster')">Rooster</button>
+                </div>
+
+                <!-- AVAILABILITY VIEW -->
+                <div id="panel-avail" class="hidden">
+                    <div class="card">
+                        <h2>Jouw Beschikbaarheid</h2>
+                        <p class="text-gray" id="avail-subtitle">Geef je beschikbare en niet-beschikbare dagen op voor 2027</p>
+                    </div>
+
+                    <!-- Recurrent Unavailability -->
+                    <div class="card">
+                        <h3>Terugkerende afwezigheid</h3>
+                        <p class="text-gray text-sm mb-4">Stel een terugkerend patroon in voor dagen waarop je structureel niet beschikbaar bent.</p>
+                        <div class="flex gap-2 flex-wrap mb-4">
+                            <div>
+                                <label>Dag van de week</label>
+                                <select id="rec-day" class="input" style="width:auto;">
+                                    <option value="">Selecteer...</option>
+                                    <option value="1">Maandag</option>
+                                    <option value="2">Dinsdag</option>
+                                    <option value="3">Woensdag</option>
+                                    <option value="4">Donderdag</option>
+                                    <option value="5">Vrijdag</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Reden</label>
+                                <select id="rec-reason" class="input" style="width:auto;">
+                                    <option value="part-time">Part-time</option>
+                                    <option value="polikliniek">Polikliniek</option>
+                                    <option value="congres">Congres/cursus</option>
+                                    <option value="vakantie">Vakantie</option>
+                                    <option value="anders">Anders</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Vanaf (optioneel)</label>
+                                <input type="date" id="rec-start" class="input" style="width:auto;">
+                            </div>
+                            <div>
+                                <label>Tot en met (optioneel)</label>
+                                <input type="date" id="rec-end" class="input" style="width:auto;">
+                            </div>
+                            <div style="display:flex;align-items:flex-end;">
+                                <button class="btn btn-primary" onclick="addRecurrence()">Toevoegen</button>
+                            </div>
+                        </div>
+                        <div id="recurrence-list"></div>
+                    </div>
+
+                    <!-- Calendar Navigation -->
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4">
+                            <button class="btn btn-primary" onclick="calPrev()">&larr; Vorige</button>
+                            <h3 id="cal-month-title" style="margin:0;"></h3>
+                            <button class="btn btn-primary" onclick="calNext()">Volgende &rarr;</button>
+                        </div>
+                        <div class="flex gap-2 flex-wrap mb-4">
+                            <button class="btn btn-success btn-sm" onclick="bulkMonth(true)">Hele maand beschikbaar</button>
+                            <button class="btn btn-danger btn-sm" onclick="bulkMonth(false)">Hele maand niet beschikbaar</button>
+                        </div>
+                        <!-- Calendar Grid -->
+                        <div class="grid grid-5 mb-4">
+                            <div class="cal-header">Ma</div>
+                            <div class="cal-header">Di</div>
+                            <div class="cal-header">Wo</div>
+                            <div class="cal-header">Do</div>
+                            <div class="cal-header">Vr</div>
+                        </div>
+                        <div class="grid grid-5" id="cal-grid"></div>
+                        <!-- Legend -->
+                        <div class="flex gap-4 flex-wrap mt-4 text-sm">
+                            <div class="flex items-center gap-2"><span style="width:16px;height:16px;border-radius:3px;background:var(--success-light);border:2px solid var(--success);display:inline-block;"></span> Beschikbaar</div>
+                            <div class="flex items-center gap-2"><span style="width:16px;height:16px;border-radius:3px;background:var(--danger-light);border:2px solid var(--danger);display:inline-block;"></span> Niet beschikbaar</div>
+                            <div class="flex items-center gap-2"><span style="width:16px;height:16px;border-radius:3px;background:var(--blue-light);border:2px solid var(--blue);display:inline-block;"></span> Voorkeur ingesteld</div>
+                            <div class="flex items-center gap-2"><span style="width:16px;height:16px;border-radius:3px;background:var(--amber-light);border:2px solid var(--amber);display:inline-block;"></span> Feestdag</div>
+                            <div class="flex items-center gap-2"><span style="width:16px;height:16px;border-radius:3px;background:var(--gray-light);border:2px solid var(--gray-border);display:inline-block;"></span> Niet ingevuld</div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-center">
+                        <button class="btn btn-primary btn-lg" onclick="saveAvailability()">Beschikbaarheid opslaan</button>
+                        <span id="save-msg" class="hidden" style="color:var(--success);font-weight:500;">&#10003; Succesvol opgeslagen</span>
+                    </div>
+                </div>
+
+                <!-- ADMIN VIEW -->
+                <div id="panel-admin" class="hidden">
+                    <div class="nav-tabs" id="admin-tabs">
+                        <button class="nav-tab active" data-tab="a-personnel" onclick="switchAdminTab('a-personnel')">Personeelsbeheer</button>
+                        <button class="nav-tab" data-tab="a-tasks" onclick="switchAdminTab('a-tasks')">Taken & Locaties</button>
+                        <button class="nav-tab" data-tab="a-holidays" onclick="switchAdminTab('a-holidays')">Feestdagen</button>
+                        <button class="nav-tab" data-tab="a-overview" onclick="switchAdminTab('a-overview')">Beschikbaarheidsoverzicht</button>
+                        <button class="nav-tab" data-tab="a-roster" onclick="switchAdminTab('a-roster')">Rooster genereren</button>
+                        <button class="nav-tab" data-tab="a-settings" onclick="switchAdminTab('a-settings')">Instellingen</button>
+                        <button class="nav-tab" data-tab="a-data" onclick="switchAdminTab('a-data')">Gegevensbeheer</button>
+                    </div>
+
+                    <!-- Personnel Management -->
+                    <div id="panel-a-personnel" class="hidden">
+                        <div class="card">
+                            <h3>Personeelsbeheer</h3>
+                            <div class="card" style="background:var(--gray-light);">
+                                <h4>Nieuwe medewerker toevoegen</h4>
+                                <div class="flex gap-2 flex-wrap items-end">
+                                    <div><label>Naam</label><input type="text" id="new-person-name" class="input" style="width:200px;"></div>
+                                    <div><label>Wachtwoord</label><input type="password" id="new-person-pass" class="input" style="width:150px;"></div>
+                                    <div><label>Doeldagen/jaar</label><input type="number" id="new-person-target" class="input" style="width:100px;" placeholder="bijv. 200" min="0" max="365"></div>
+                                    <div class="flex items-center gap-2" style="padding-bottom:0.5rem;">
+                                        <input type="checkbox" id="new-person-admin"> <label for="new-person-admin" style="margin:0;">Beheerder</label>
+                                    </div>
+                                    <button class="btn btn-primary" onclick="addPerson()">Toevoegen</button>
+                                </div>
+                            </div>
+                            <div id="personnel-list" class="mt-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tasks & Locations -->
+                    <div id="panel-a-tasks" class="hidden">
+                        <div class="card">
+                            <h3>Locaties</h3>
+                            <div class="flex gap-2 mb-4">
+                                <input type="text" id="new-location" class="input" style="width:200px;" placeholder="Nieuwe locatie...">
+                                <button class="btn btn-primary" onclick="addLocation()">Toevoegen</button>
+                            </div>
+                            <div id="location-list"></div>
+                        </div>
+                        <div class="card">
+                            <h3>Taken</h3>
+                            <div class="flex gap-2 flex-wrap items-end mb-4">
+                                <div><label>Taaknaam</label><input type="text" id="new-task-name" class="input" style="width:200px;"></div>
+                                <div><label>Locatie</label><select id="new-task-loc" class="input" style="width:150px;"></select></div>
+                                <button class="btn btn-primary" onclick="addTask()">Toevoegen</button>
+                            </div>
+                            <div id="task-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Holidays -->
+                    <div id="panel-a-holidays" class="hidden">
+                        <div class="card">
+                            <h3>Feestdagen</h3>
+                            <p class="text-gray text-sm mb-4">Feestdagen worden automatisch als niet-roosterbaar gemarkeerd.</p>
+                            <div class="flex gap-2 items-end mb-4">
+                                <div><label>Datum</label><input type="date" id="new-holiday-date" class="input" style="width:180px;"></div>
+                                <div><label>Naam</label><input type="text" id="new-holiday-name" class="input" style="width:200px;" placeholder="Naam feestdag..."></div>
+                                <button class="btn btn-primary" onclick="addHoliday()">Toevoegen</button>
+                            </div>
+                            <div id="holiday-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Availability Overview -->
+                    <div id="panel-a-overview" class="hidden">
+                        <div class="card">
+                            <h3>Beschikbaarheidsoverzicht</h3>
+                            <div class="flex gap-2 items-center mb-4">
+                                <button class="btn btn-gray btn-sm" onclick="overviewPrev()">&larr; Vorige</button>
+                                <span id="overview-range" class="font-bold"></span>
+                                <button class="btn btn-gray btn-sm" onclick="overviewNext()">Volgende &rarr;</button>
+                            </div>
+                            <div class="table-wrap" id="overview-table-wrap"></div>
+                        </div>
+                    </div>
+
+                    <!-- Roster Generation -->
+                    <div id="panel-a-roster" class="hidden">
+                        <div class="card">
+                            <h3>Rooster genereren</h3>
+                            <div class="mb-4" style="max-width:400px;">
+                                <label>Generatiemethode</label>
+                                <select id="gen-method" class="input">
+                                    <option value="ai">Claude AI (iteratief geoptimaliseerd)</option>
+                                    <option value="local">Lokaal algoritme (geen API nodig)</option>
+                                </select>
+                            </div>
+                            <div id="api-key-section" class="mb-4" style="max-width:500px;">
+                                <label>Claude API-sleutel</label>
+                                <input type="password" id="gen-apikey" class="input mb-2" placeholder="sk-ant-...">
+                                <p class="text-xs text-gray">Nodig voor Claude AI generatie. Je sleutel wordt lokaal opgeslagen.</p>
+                            </div>
+                            <!-- Editable prompt (AI mode) -->
+                            <div id="prompt-section" class="mb-4 hidden">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label style="margin:0;">Prompt (bewerkbaar)</label>
+                                    <div class="flex gap-2">
+                                        <button class="btn btn-gray btn-sm" onclick="refreshPrompt()">Prompt herladen</button>
+                                        <button class="btn btn-blue btn-sm" onclick="copyPrompt()">Kopi&euml;ren</button>
+                                        <span id="prompt-charcount" class="text-xs text-gray" style="line-height:2;"></span>
+                                    </div>
+                                </div>
+                                <textarea id="prompt-editor" class="input" rows="12" style="font-family:monospace;font-size:0.8rem;"></textarea>
+                            </div>
+
+                            <div class="flex gap-2 flex-wrap mb-4">
+                                <button class="btn btn-primary btn-lg" id="btn-generate" onclick="generateRoster()">Rooster genereren</button>
+                                <button class="btn btn-purple hidden" id="btn-optimize" onclick="optimizeRoster()">Rooster optimaliseren met AI</button>
+                                <button class="btn btn-success hidden" id="btn-publish" onclick="publishRoster()">Rooster publiceren</button>
+                            </div>
+                            <div id="gen-status"></div>
+                            <div id="gen-stats" class="hidden card mb-4" style="background:var(--gray-light);"></div>
+
+                            <!-- Paste Response (for manual AI workflow) -->
+                            <div id="paste-section" class="card mb-4 hidden" style="background:var(--gray-light);">
+                                <h4>Handmatig: plak het antwoord van Claude</h4>
+                                <p class="text-xs text-gray mb-2">Als de directe API-aanroep niet lukt, kopieer de prompt hierboven en plak het antwoord van Claude hier.</p>
+                                <textarea id="paste-response" class="input" rows="5" placeholder="Plak hier het JSON-antwoord van Claude..."></textarea>
+                                <button class="btn btn-primary mt-2" onclick="processPastedResponse()">Verwerken</button>
+                            </div>
+
+                            <!-- Roster Editor -->
+                            <div id="roster-editor" class="hidden">
+                                <h4>Rooster bewerken</h4>
+                                <div class="flex gap-2 items-center mb-4">
+                                    <button class="btn btn-gray btn-sm" onclick="rosterEditorPrev()">&larr; Vorige</button>
+                                    <span id="roster-editor-range" class="font-bold"></span>
+                                    <button class="btn btn-gray btn-sm" onclick="rosterEditorNext()">Volgende &rarr;</button>
+                                </div>
+                                <div class="table-wrap" id="roster-editor-table"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings -->
+                    <div id="panel-a-settings" class="hidden">
+                        <div class="card">
+                            <h3>Instellingen</h3>
+                            <div class="flex-col gap-4" style="max-width:500px;">
+                                <div>
+                                    <label>Roosterjaar</label>
+                                    <input type="number" id="set-year" class="input" style="width:120px;">
+                                </div>
+                                <button class="btn btn-primary" onclick="saveSettings()">Instellingen opslaan</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div id="panel-a-data" class="hidden">
+                        <div class="card mb-4">
+                            <h3>Excel-export</h3>
+                            <p class="text-sm text-gray mb-4">Exporteer het huidige rooster als Excel-bestanden.</p>
+                            <div class="flex gap-4 flex-wrap">
+                                <button class="btn btn-success" onclick="exportExcelPersonView()">Personeelsoverzicht (.xlsx)</button>
+                                <button class="btn btn-blue" onclick="exportExcelTaskView()">Taakenoverzicht (.xlsx)</button>
+                            </div>
+                        </div>
+                        <div class="card mb-4">
+                            <h3>Gegevensbeheer</h3>
+                            <div class="flex gap-4 flex-wrap">
+                                <button class="btn btn-primary" onclick="exportData()">Alle gegevens exporteren (JSON)</button>
+                                <div>
+                                    <label>Gegevens importeren</label>
+                                    <input type="file" accept=".json" onchange="importData(event)" class="input" style="width:auto;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROSTER DISPLAY VIEW -->
+                <div id="panel-roster" class="hidden">
+                    <div class="card">
+                        <h2 id="roster-title">Rooster 2027</h2>
+                        <p class="text-gray">Jouw diensten en toewijzingen</p>
+                    </div>
+                    <div class="card">
+                        <div class="grid grid-3 mb-4">
+                            <div>
+                                <label>Filter op persoon</label>
+                                <select id="filter-person" class="input" onchange="renderRosterDisplay()"><option value="">Alle medewerkers</option></select>
+                            </div>
+                            <div>
+                                <label>Filter op taak</label>
+                                <select id="filter-task" class="input" onchange="renderRosterDisplay()"><option value="">Alle taken</option></select>
+                            </div>
+                            <div>
+                                <label>Filter op locatie</label>
+                                <select id="filter-loc" class="input" onchange="renderRosterDisplay()"><option value="">Alle locaties</option></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="roster-display"></div>
+                    <div class="card mt-4">
+                        <h4>Agenda-export</h4>
+                        <div class="flex gap-2 flex-wrap">
+                            <button class="btn btn-blue" onclick="exportICS()">Mijn rooster exporteren (.ics)</button>
+                        </div>
+                        <p class="text-gray text-sm mt-2">Download een .ics-bestand dat je kunt importeren in Outlook, Google Calendar, Apple Calendar, etc.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REASON MODAL -->
+        <div id="modal-reason" class="modal-overlay hidden">
+            <div class="modal">
+                <h3 class="mb-4" id="reason-modal-title">Reden van afwezigheid</h3>
+                <div class="mb-4">
+                    <label>Reden</label>
+                    <select id="reason-select" class="input">
+                        <option value="vakantie">Vakantie</option>
+                        <option value="congres">Congres/cursus</option>
+                        <option value="polikliniek">Polikliniek</option>
+                        <option value="part-time">Part-time</option>
+                        <option value="anders">Anders</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary flex-1" onclick="confirmUnavailable()">Bevestigen</button>
+                    <button class="btn btn-gray flex-1" onclick="closeReasonModal()">Annuleren</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREFERENCE MODAL -->
+        <div id="modal-pref" class="modal-overlay hidden">
+            <div class="modal">
+                <h3 class="mb-4" id="pref-modal-title">Voorkeuren instellen</h3>
+                <div class="mb-4">
+                    <label>Taakvoorkeur (optioneel)</label>
+                    <select id="pref-task" class="input"><option value="">Geen voorkeur</option></select>
+                </div>
+                <div class="mb-4">
+                    <label>Locatievoorkeur (optioneel)</label>
+                    <select id="pref-loc" class="input"><option value="">Geen voorkeur</option></select>
+                </div>
+                <div class="mb-4">
+                    <label>Opmerkingen (optioneel)</label>
+                    <textarea id="pref-notes" class="input" rows="3" placeholder="Eventuele opmerkingen..."></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary flex-1" onclick="savePref()">Opslaan</button>
+                    <button class="btn btn-gray flex-1" onclick="closePrefModal()">Annuleren</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EDIT PERSON MODAL -->
+        <div id="modal-edit-person" class="modal-overlay hidden">
+            <div class="modal">
+                <h3 class="mb-4">Medewerker bewerken</h3>
+                <div class="mb-4">
+                    <label>Naam</label>
+                    <input type="text" id="edit-person-name" class="input">
+                </div>
+                <div class="mb-4">
+                    <label>Wachtwoord</label>
+                    <input type="password" id="edit-person-pass" class="input">
+                </div>
+                <div class="mb-4">
+                    <label>Doeldagen per jaar</label>
+                    <input type="number" id="edit-person-target" class="input" style="width:120px;" placeholder="bijv. 200" min="0" max="365">
+                    <p class="text-xs text-gray mt-1">Optimaal aantal ingeroosterde dagen voor deze medewerker.</p>
+                </div>
+                <div class="mb-4 flex items-center gap-2">
+                    <input type="checkbox" id="edit-person-admin">
+                    <label for="edit-person-admin" style="margin:0;">Beheerder</label>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary flex-1" onclick="saveEditPerson()">Opslaan</button>
+                    <button class="btn btn-gray flex-1" onclick="closeEditPersonModal()">Annuleren</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TASK ACTIVE DAYS MODAL -->
+        <div id="modal-task-days" class="modal-overlay hidden">
+            <div class="modal">
+                <h3 class="mb-4" id="task-days-title">Actieve dagen</h3>
+                <div class="mb-4">
+                    <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="td-1" value="1"> Maandag</label>
+                    <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="td-2" value="2"> Dinsdag</label>
+                    <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="td-3" value="3"> Woensdag</label>
+                    <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="td-4" value="4"> Donderdag</label>
+                    <label class="flex items-center gap-2 mb-2"><input type="checkbox" id="td-5" value="5"> Vrijdag</label>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary flex-1" onclick="saveTaskDays()">Opslaan</button>
+                    <button class="btn btn-gray flex-1" onclick="closeTaskDaysModal()">Annuleren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================================
+    // STATE
+    // ============================================================
+    const MONTH_NAMES = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+    const DAY_NAMES = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+    const DAY_NAMES_FULL = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+    const REASON_LABELS = { vakantie:'Vakantie', congres:'Congres/cursus', polikliniek:'Polikliniek', 'part-time':'Part-time', anders:'Anders' };
+
+    let STATE = {
+        rosterYear: 2027,
+        locations: ['AMC','VUmc'],
+        tasks: [
+            { id:1, name:'AOA', location:'AMC', activeDays:[1,2,3,4,5] },
+            { id:2, name:'SEH', location:'AMC', activeDays:[1,2,3,4,5] },
+            { id:3, name:'SSO', location:'VUmc', activeDays:[1,2,3,4,5] },
+            { id:4, name:'Consulten VU', location:'VUmc', activeDays:[1,2,3,4,5] }
+        ],
+        nextTaskId: 5,
+        personnel: [
+            { id:1, name:'Admin', password:'admin123', isAdmin:true },
+            { id:2, name:'Persoon 1', password:'pass', isAdmin:false },
+            { id:3, name:'Persoon 2', password:'pass', isAdmin:false },
+            { id:4, name:'Persoon 3', password:'pass', isAdmin:false },
+            { id:5, name:'Persoon 4', password:'pass', isAdmin:false },
+            { id:6, name:'Persoon 5', password:'pass', isAdmin:false },
+            { id:7, name:'Persoon 6', password:'pass', isAdmin:false },
+            { id:8, name:'Persoon 7', password:'pass', isAdmin:false },
+            { id:9, name:'Persoon 8', password:'pass', isAdmin:false },
+            { id:10, name:'Persoon 9', password:'pass', isAdmin:false },
+            { id:11, name:'Persoon 10', password:'pass', isAdmin:false },
+            { id:12, name:'Persoon 11', password:'pass', isAdmin:false },
+            { id:13, name:'Persoon 12', password:'pass', isAdmin:false },
+            { id:14, name:'Persoon 13', password:'pass', isAdmin:false },
+            { id:15, name:'Persoon 14', password:'pass', isAdmin:false },
+            { id:16, name:'Persoon 15', password:'pass', isAdmin:false },
+            { id:17, name:'Persoon 16', password:'pass', isAdmin:false },
+            { id:18, name:'Persoon 17', password:'pass', isAdmin:false }
+        ],
+        nextPersonId: 19,
+        holidays: [
+            { date:'2027-01-01', name:'Nieuwjaarsdag' },
+            { date:'2027-03-26', name:'Goede Vrijdag' },
+            { date:'2027-03-28', name:'Eerste Paasdag' },
+            { date:'2027-03-29', name:'Tweede Paasdag' },
+            { date:'2027-04-27', name:'Koningsdag' },
+            { date:'2027-05-05', name:'Bevrijdingsdag' },
+            { date:'2027-05-06', name:'Hemelvaartsdag' },
+            { date:'2027-05-16', name:'Eerste Pinksterdag' },
+            { date:'2027-05-17', name:'Tweede Pinksterdag' },
+            { date:'2027-12-25', name:'Eerste Kerstdag' },
+            { date:'2027-12-26', name:'Tweede Kerstdag' }
+        ],
+        availability: {},
+        recurrences: {},
+        roster: {},
+        rosterPublished: false,
+        apiKey: '',
+        corsProxy: 'https://corsproxy.io/?',
+        msClientId: ''
+    };
+
+    let currentUser = null;
+    let calMonth = 0; // 0-11
+    let calYear = 2027;
+    let overviewPage = 0;
+    let rosterEditorPage = 0;
+    let pendingDayClick = null; // for reason modal
+    let pendingPrefDate = null; // for pref modal
+    let editingPersonId = null;
+    let editingTaskId = null;
+
+    // ============================================================
+    // SUPABASE / PERSISTENCE
+    // ============================================================
+    let sbClient = null;
+    let isOnline = false;
+    let saveDebounceTimer = null;
+    let realtimeChannel = null;
+
+    // Data is split into "sections" stored as rows in the app_data table:
+    //   'config'              → {rosterYear, locations, personnel, tasks, holidays, rosterPublished, nextPersonId, nextTaskId, apiKey}
+    //   'availability:{id}'   → the availability object for person {id}
+    //   'recurrences:{id}'    → the recurrences array for person {id}
+    //   'roster'              → the full roster object
+
+    function getSupabaseConfig() {
+        try {
+            const c = localStorage.getItem('roosterSupabase');
+            return c ? JSON.parse(c) : null;
+        } catch { return null; }
+    }
+
+    function setSupabaseConfig(url, key) {
+        localStorage.setItem('roosterSupabase', JSON.stringify({ url, key }));
+    }
+
+    function initSupabaseClient(url, key) {
+        sbClient = window.supabase.createClient(url, key, {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+            },
+            realtime: { params: { eventsPerSecond: 2 } }
+        });
+        isOnline = true;
+    }
+
+    async function testSupabaseConnection(url, key) {
+        // Test via direct REST call to avoid postMessage/Headers clone issues
+        const resp = await fetch(url + '/rest/v1/app_data?select=key&limit=1', {
+            headers: {
+                'apikey': key,
+                'Authorization': 'Bearer ' + key
+            }
+        });
+        if (!resp.ok) {
+            const body = await resp.text();
+            if (resp.status === 404 || body.includes('relation')) {
+                throw new Error('Tabel "app_data" niet gevonden. Heb je de SQL uit de setup-handleiding uitgevoerd?');
+            }
+            throw new Error('HTTP ' + resp.status + ': ' + body);
+        }
+        return await resp.json();
+    }
+
+    async function connectSupabase() {
+        const url = document.getElementById('setup-url').value.trim().replace(/\/$/, '');
+        const key = document.getElementById('setup-key').value.trim();
+        const errEl = document.getElementById('setup-error');
+        errEl.classList.add('hidden');
+
+        if (!url || !key) { errEl.textContent = 'Vul beide velden in.'; errEl.classList.remove('hidden'); return; }
+
+        try {
+            // First test connection with a direct REST call
+            await testSupabaseConnection(url, key);
+
+            // Connection works — initialize the full client
+            initSupabaseClient(url, key);
+            setSupabaseConfig(url, key);
+
+            // Load data from Supabase (or seed if empty)
+            await loadFromSupabase();
+            startRealtimeSync();
+            updateSyncIndicator();
+
+            document.getElementById('view-setup').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            showLoginView();
+        } catch(e) {
+            errEl.textContent = 'Verbinding mislukt: ' + e.message;
+            errEl.classList.remove('hidden');
+            isOnline = false;
+            sbClient = null;
+        }
+    }
+
+    function startOffline() {
+        isOnline = false;
+        loadFromLocalStorage();
+        document.getElementById('view-setup').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        updateSyncIndicator();
+        showLoginView();
+    }
+
+    function updateSyncIndicator() {
+        const el = document.getElementById('sync-indicator');
+        if (!el) return;
+        if (isOnline) {
+            el.innerHTML = '<span style="color:var(--success);">&#9679;</span> Online';
+        } else {
+            el.innerHTML = '<span style="color:var(--gray);">&#9679;</span> Lokaal';
+        }
+    }
+
+    // --- LOCAL STORAGE (fallback / cache) ---
+    function saveToLocalStorage() {
+        try { localStorage.setItem('rosterAppData', JSON.stringify(STATE)); } catch(e) { console.warn('Save failed', e); }
+    }
+    function loadFromLocalStorage() {
+        try {
+            const d = localStorage.getItem('rosterAppData');
+            if (d) {
+                const parsed = JSON.parse(d);
+                for (const key of Object.keys(parsed)) {
+                    if (parsed[key] !== undefined) STATE[key] = parsed[key];
+                }
+            }
+        } catch(e) { console.warn('Load failed', e); }
+    }
+
+    // --- SUPABASE OPERATIONS ---
+    function stateToSections() {
+        // Split STATE into keyed sections for the database
+        const sections = {};
+        sections['config'] = {
+            rosterYear: STATE.rosterYear, locations: STATE.locations, personnel: STATE.personnel,
+            tasks: STATE.tasks, holidays: STATE.holidays, rosterPublished: STATE.rosterPublished,
+            nextPersonId: STATE.nextPersonId, nextTaskId: STATE.nextTaskId, apiKey: STATE.apiKey || ''
+        };
+        sections['roster'] = STATE.roster || {};
+        // Per-person availability and recurrences
+        for (const pid of Object.keys(STATE.availability || {})) {
+            sections['availability:' + pid] = STATE.availability[pid];
+        }
+        for (const pid of Object.keys(STATE.recurrences || {})) {
+            sections['recurrences:' + pid] = STATE.recurrences[pid];
+        }
+        return sections;
+    }
+
+    function sectionsToState(rows) {
+        for (const row of rows) {
+            const k = row.key;
+            const v = row.value;
+            if (k === 'config') {
+                STATE.rosterYear = v.rosterYear ?? STATE.rosterYear;
+                STATE.locations = v.locations ?? STATE.locations;
+                STATE.personnel = v.personnel ?? STATE.personnel;
+                STATE.tasks = v.tasks ?? STATE.tasks;
+                STATE.holidays = v.holidays ?? STATE.holidays;
+                STATE.rosterPublished = v.rosterPublished ?? STATE.rosterPublished;
+                STATE.nextPersonId = v.nextPersonId ?? STATE.nextPersonId;
+                STATE.nextTaskId = v.nextTaskId ?? STATE.nextTaskId;
+                STATE.apiKey = v.apiKey ?? '';
+            } else if (k === 'roster') {
+                STATE.roster = v || {};
+            } else if (k.startsWith('availability:')) {
+                const pid = k.split(':')[1];
+                STATE.availability[pid] = v;
+            } else if (k.startsWith('recurrences:')) {
+                const pid = k.split(':')[1];
+                STATE.recurrences[pid] = v;
+            }
+        }
+    }
+
+    async function loadFromSupabase() {
+        const { data, error } = await sbClient.from('app_data').select('key, value');
+        if (error) throw new Error(error.message);
+
+        if (!data || data.length === 0) {
+            // First time: seed the database with default STATE
+            await saveAllToSupabase();
+        } else {
+            // Reset availability and recurrences before loading
+            STATE.availability = {};
+            STATE.recurrences = {};
+            sectionsToState(data);
+        }
+        // Also cache locally
+        saveToLocalStorage();
+    }
+
+    async function saveAllToSupabase() {
+        if (!isOnline || !sbClient) return;
+        const sections = stateToSections();
+        const rows = Object.entries(sections).map(([key, value]) => ({
+            key, value, updated_at: new Date().toISOString()
+        }));
+        const { error } = await sbClient.from('app_data').upsert(rows, { onConflict: 'key' });
+        if (error) console.warn('Supabase save error:', error.message);
+    }
+
+    async function saveSectionToSupabase(sectionKey, value) {
+        if (!isOnline || !sbClient) return;
+        const { error } = await sbClient.from('app_data').upsert(
+            { key: sectionKey, value, updated_at: new Date().toISOString() },
+            { onConflict: 'key' }
+        );
+        if (error) console.warn('Supabase save error for ' + sectionKey + ':', error.message);
+    }
+
+    // --- MAIN SAVE FUNCTION (replaces old save()) ---
+    function save(changedSection) {
+        // Always cache locally
+        saveToLocalStorage();
+
+        if (!isOnline || !sbClient) return;
+
+        // Debounce Supabase writes (100ms)
+        clearTimeout(saveDebounceTimer);
+        saveDebounceTimer = setTimeout(() => {
+            if (changedSection) {
+                // Save only the changed section
+                const sections = stateToSections();
+                if (sections[changedSection] !== undefined) {
+                    saveSectionToSupabase(changedSection, sections[changedSection]);
+                }
+            } else {
+                // Save all sections that might have changed
+                saveAllToSupabase();
+            }
+        }, 100);
+    }
+
+    // --- REALTIME SYNC ---
+    function startRealtimeSync() {
+        if (!isOnline || !sbClient) return;
+
+        realtimeChannel = sbClient.channel('app_data_changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'app_data' },
+                (payload) => {
+                    // Another user changed data — update our STATE
+                    if (payload.new && payload.new.key && payload.new.value) {
+                        sectionsToState([payload.new]);
+                        saveToLocalStorage();
+                        // Refresh the current view
+                        refreshCurrentView();
+                    }
+                }
+            )
+            .subscribe();
+    }
+
+    function refreshCurrentView() {
+        // Re-render whatever is currently visible
+        try {
+            if (!currentUser) { populateLoginDropdown(); return; }
+            const activeMainTab = document.querySelector('#main-tabs .nav-tab.active');
+            if (activeMainTab) {
+                const tab = activeMainTab.dataset.tab;
+                if (tab === 'avail') renderAvailCalendar();
+                if (tab === 'roster') renderRosterDisplay();
+                if (tab === 'admin') {
+                    const activeAdminTab = document.querySelector('#admin-tabs .nav-tab.active');
+                    if (activeAdminTab) switchAdminTab(activeAdminTab.dataset.tab);
+                }
+            }
+        } catch(e) { console.warn('View refresh error:', e); }
+    }
+
+    // Convenience wrappers for targeted saves
+    function saveConfig() { save('config'); }
+    function saveRoster() { save('roster'); }
+    function saveAvailability(personId) { save('availability:' + personId); }
+    function saveRecurrences(personId) { save('recurrences:' + personId); }
+
+    // ============================================================
+    // DATE UTILITIES
+    // ============================================================
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function dateStr(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+    function parseDate(s) { const p = s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+    function formatDateNL(s) {
+        const d = parseDate(s);
+        return DAY_NAMES[d.getDay()] + ' ' + d.getDate() + ' ' + MONTH_NAMES[d.getMonth()];
+    }
+    function isHoliday(ds) { return STATE.holidays.find(h => h.date === ds); }
+
+    function getMonthWeekdays(month, year) {
+        // Returns array of { date: string, day: number (getDate), dow: number (1-5 for Mon-Fri) }
+        // for all weekdays in the given month
+        const result = [];
+        const d = new Date(year, month, 1);
+        while (d.getMonth() === month) {
+            const dow = d.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
+            if (dow >= 1 && dow <= 5) {
+                result.push({ date: dateStr(year, month, d.getDate()), day: d.getDate(), dow: dow });
+            }
+            d.setDate(d.getDate() + 1);
+        }
+        return result;
+    }
+
+    function getMonthGridCells(month, year) {
+        // Returns array where each item is either a weekday object or null (empty cell)
+        // Organized so Mon=col0, Tue=col1, ... Fri=col4
+        const weekdays = getMonthWeekdays(month, year);
+        if (weekdays.length === 0) return [];
+        const cells = [];
+        // First week: add empty cells before first weekday
+        const firstDow = weekdays[0].dow; // 1=Mon
+        for (let i = 1; i < firstDow; i++) cells.push(null);
+        let prevDow = firstDow;
+        for (const wd of weekdays) {
+            // If there's a week break (new week starts on Mon after prev was Fri)
+            if (wd.dow <= prevDow && cells.length > 0) {
+                // Pad end of previous week
+                while (cells.length % 5 !== 0) cells.push(null);
+                // Pad start of new week
+                for (let i = 1; i < wd.dow; i++) cells.push(null);
+            }
+            cells.push(wd);
+            prevDow = wd.dow;
+        }
+        // Pad end
+        while (cells.length % 5 !== 0) cells.push(null);
+        return cells;
+    }
+
+    function getAllWeekdays(year) {
+        const days = [];
+        for (let m = 0; m < 12; m++) {
+            const wds = getMonthWeekdays(m, year || STATE.rosterYear);
+            for (const wd of wds) days.push(wd.date);
+        }
+        return days;
+    }
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+    function populateLoginDropdown() {
+        const sel = document.getElementById('login-name');
+        sel.innerHTML = '<option value="">Selecteer je naam...</option>';
+        for (const p of STATE.personnel) {
+            sel.innerHTML += '<option value="' + p.id + '">' + escHtml(p.name) + '</option>';
+        }
+        document.getElementById('login-year-label').textContent = STATE.rosterYear + ' Planner';
+    }
+
+    function doLogin() {
+        const id = parseInt(document.getElementById('login-name').value);
+        const pass = document.getElementById('login-pass').value;
+        const person = STATE.personnel.find(p => p.id === id && p.password === pass);
+        if (!person) {
+            const errEl = document.getElementById('login-error');
+            errEl.textContent = 'Ongeldige inloggegevens';
+            errEl.classList.remove('hidden');
+            return;
+        }
+        currentUser = person;
+        document.getElementById('login-pass').value = '';
+        document.getElementById('login-error').classList.add('hidden');
+        calYear = STATE.rosterYear;
+        calMonth = 0;
+        overviewPage = 0;
+        rosterEditorPage = 0;
+        showMainView();
+    }
+
+    function doLogout() {
+        currentUser = null;
+        showLoginView();
+    }
+
+    function showLoginView() {
+        populateLoginDropdown();
+        document.getElementById('view-login').classList.remove('hidden');
+        document.getElementById('view-main').classList.add('hidden');
+    }
+
+    function showMainView() {
+        document.getElementById('view-login').classList.add('hidden');
+        document.getElementById('view-main').classList.remove('hidden');
+        document.getElementById('user-badge').textContent = currentUser.name;
+        document.getElementById('app-title').textContent = 'Ziekenhuis Rooster ' + STATE.rosterYear;
+
+        if (currentUser.isAdmin) {
+            document.getElementById('admin-badge').classList.remove('hidden');
+            document.getElementById('tab-admin').classList.remove('hidden');
+        } else {
+            document.getElementById('admin-badge').classList.add('hidden');
+            document.getElementById('tab-admin').classList.add('hidden');
+        }
+
+        if (STATE.rosterPublished) {
+            document.getElementById('tab-roster').classList.remove('hidden');
+        } else {
+            document.getElementById('tab-roster').classList.add('hidden');
+        }
+
+        switchMainTab('avail');
+    }
+
+    // ============================================================
+    // TAB SWITCHING
+    // ============================================================
+    function switchMainTab(tab) {
+        document.querySelectorAll('#main-tabs .nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+        document.getElementById('panel-avail').classList.toggle('hidden', tab !== 'avail');
+        document.getElementById('panel-admin').classList.toggle('hidden', tab !== 'admin');
+        document.getElementById('panel-roster').classList.toggle('hidden', tab !== 'roster');
+
+        if (tab === 'avail') renderAvailCalendar();
+        if (tab === 'admin') { switchAdminTab('a-personnel'); }
+        if (tab === 'roster') renderRosterDisplay();
+    }
+
+    function switchAdminTab(tab) {
+        document.querySelectorAll('#admin-tabs .nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+        ['a-personnel','a-tasks','a-holidays','a-overview','a-roster','a-settings','a-data'].forEach(p => {
+            document.getElementById('panel-' + p).classList.toggle('hidden', p !== tab);
+        });
+        if (tab === 'a-personnel') renderPersonnelList();
+        if (tab === 'a-tasks') renderTasksAndLocations();
+        if (tab === 'a-holidays') renderHolidays();
+        if (tab === 'a-overview') renderOverview();
+        if (tab === 'a-roster') { renderRosterEditor(); initRosterGenPanel(); }
+        if (tab === 'a-settings') loadSettings();
+    }
+
+    // ============================================================
+    // UTILITY
+    // ============================================================
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function getPersonName(id) { const p = STATE.personnel.find(x => x.id === id); return p ? p.name : ''; }
+    function getTaskColor(idx) { return 'task-c' + (idx % 8); }
+    function getAvail(personId, dateStr) {
+        if (!STATE.availability[personId]) STATE.availability[personId] = {};
+        return STATE.availability[personId][dateStr] || null;
+    }
+    function setAvail(personId, dateStr, data) {
+        if (!STATE.availability[personId]) STATE.availability[personId] = {};
+        STATE.availability[personId][dateStr] = data;
+    }
+
+    // ============================================================
+    // AVAILABILITY CALENDAR
+    // ============================================================
+    function renderAvailCalendar() {
+        document.getElementById('avail-subtitle').textContent =
+            'Geef je beschikbare en niet-beschikbare dagen op voor ' + STATE.rosterYear;
+        document.getElementById('cal-month-title').textContent = MONTH_NAMES[calMonth] + ' ' + calYear;
+
+        const grid = document.getElementById('cal-grid');
+        const cells = getMonthGridCells(calMonth, calYear);
+        let html = '';
+        for (const cell of cells) {
+            if (!cell) {
+                html += '<div class="cal-day empty"></div>';
+                continue;
+            }
+            const ds = cell.date;
+            const hol = isHoliday(ds);
+            if (hol) {
+                html += '<div class="cal-day holiday"><span class="cal-day-num">' + cell.day + '</span>';
+                html += '<span class="cal-day-holiday">' + escHtml(hol.name) + '</span></div>';
+                continue;
+            }
+            const avail = getAvail(currentUser.id, ds);
+            let cls = 'cal-day';
+            let label = '';
+            if (avail) {
+                if (avail.taskPreference || avail.locationPreference) {
+                    cls += ' has-pref';
+                    label = avail.taskPreference || avail.locationPreference || '';
+                } else if (avail.available) {
+                    cls += ' available';
+                } else {
+                    cls += ' unavailable';
+                    if (avail.reason) label = REASON_LABELS[avail.reason] || avail.reason;
+                }
+            }
+            html += '<div class="' + cls + '" onclick="calDayClick(\'' + ds + '\')" oncontextmenu="event.preventDefault();calDayPref(\'' + ds + '\')">';
+            html += '<div class="flex justify-between items-center"><span class="cal-day-num">' + cell.day + '</span>';
+            html += '<span class="text-xs" style="cursor:pointer;color:var(--blue);" onclick="event.stopPropagation();calDayPref(\'' + ds + '\')">&#9881;</span></div>';
+            if (label) html += '<span class="cal-day-reason">' + escHtml(label) + '</span>';
+            html += '</div>';
+        }
+        grid.innerHTML = html;
+        renderRecurrenceList();
+    }
+
+    function calDayClick(ds) {
+        const avail = getAvail(currentUser.id, ds);
+        if (avail && avail.available) {
+            // Toggle to unavailable -> ask reason
+            pendingDayClick = ds;
+            document.getElementById('reason-modal-title').textContent = 'Reden van afwezigheid — ' + formatDateNL(ds);
+            document.getElementById('modal-reason').classList.remove('hidden');
+        } else if (avail && !avail.available) {
+            // Toggle to available
+            setAvail(currentUser.id, ds, { available: true });
+            save();
+            renderAvailCalendar();
+        } else {
+            // Not set -> set available
+            setAvail(currentUser.id, ds, { available: true });
+            save();
+            renderAvailCalendar();
+        }
+    }
+
+    function confirmUnavailable() {
+        const reason = document.getElementById('reason-select').value;
+        const ds = pendingDayClick;
+        const existing = getAvail(currentUser.id, ds) || {};
+        setAvail(currentUser.id, ds, { ...existing, available: false, reason: reason });
+        save();
+        closeReasonModal();
+        renderAvailCalendar();
+    }
+
+    function closeReasonModal() {
+        document.getElementById('modal-reason').classList.add('hidden');
+        pendingDayClick = null;
+    }
+
+    function calDayPref(ds) {
+        pendingPrefDate = ds;
+        const avail = getAvail(currentUser.id, ds) || {};
+        // Populate task dropdown
+        const taskSel = document.getElementById('pref-task');
+        taskSel.innerHTML = '<option value="">Geen voorkeur</option>';
+        for (const t of STATE.tasks) {
+            taskSel.innerHTML += '<option value="' + escHtml(t.name) + '"' +
+                (avail.taskPreference === t.name ? ' selected' : '') + '>' +
+                escHtml(t.name) + ' (' + escHtml(t.location) + ')</option>';
+        }
+        // Populate location dropdown
+        const locSel = document.getElementById('pref-loc');
+        locSel.innerHTML = '<option value="">Geen voorkeur</option>';
+        for (const l of STATE.locations) {
+            locSel.innerHTML += '<option value="' + escHtml(l) + '"' +
+                (avail.locationPreference === l ? ' selected' : '') + '>' + escHtml(l) + '</option>';
+        }
+        document.getElementById('pref-notes').value = avail.notes || '';
+        document.getElementById('pref-modal-title').textContent = 'Voorkeuren — ' + formatDateNL(ds);
+        document.getElementById('modal-pref').classList.remove('hidden');
+    }
+
+    function savePref() {
+        const ds = pendingPrefDate;
+        const existing = getAvail(currentUser.id, ds) || { available: true };
+        existing.taskPreference = document.getElementById('pref-task').value || undefined;
+        existing.locationPreference = document.getElementById('pref-loc').value || undefined;
+        existing.notes = document.getElementById('pref-notes').value || undefined;
+        if (!existing.available && existing.available !== false) existing.available = true;
+        setAvail(currentUser.id, ds, existing);
+        save();
+        closePrefModal();
+        renderAvailCalendar();
+    }
+
+    function closePrefModal() {
+        document.getElementById('modal-pref').classList.add('hidden');
+        pendingPrefDate = null;
+    }
+
+    function calPrev() {
+        calMonth--;
+        if (calMonth < 0) { calMonth = 11; calYear--; }
+        renderAvailCalendar();
+    }
+    function calNext() {
+        calMonth++;
+        if (calMonth > 11) { calMonth = 0; calYear++; }
+        renderAvailCalendar();
+    }
+
+    function bulkMonth(avail) {
+        const weekdays = getMonthWeekdays(calMonth, calYear);
+        if (!avail) {
+            // Ask reason for bulk unavailable
+            const reason = prompt('Reden: vakantie, congres, polikliniek, part-time, anders', 'vakantie');
+            if (!reason) return;
+            for (const wd of weekdays) {
+                if (isHoliday(wd.date)) continue;
+                const existing = getAvail(currentUser.id, wd.date) || {};
+                setAvail(currentUser.id, wd.date, { ...existing, available: false, reason: reason });
+            }
+        } else {
+            for (const wd of weekdays) {
+                if (isHoliday(wd.date)) continue;
+                const existing = getAvail(currentUser.id, wd.date) || {};
+                setAvail(currentUser.id, wd.date, { ...existing, available: true, reason: undefined });
+            }
+        }
+        save();
+        renderAvailCalendar();
+    }
+
+    function saveAvailability() {
+        save();
+        const msg = document.getElementById('save-msg');
+        msg.classList.remove('hidden');
+        setTimeout(() => msg.classList.add('hidden'), 3000);
+    }
+
+    // ============================================================
+    // RECURRENCES
+    // ============================================================
+    function addRecurrence() {
+        const day = parseInt(document.getElementById('rec-day').value);
+        if (!day) { alert('Selecteer een dag van de week.'); return; }
+        const reason = document.getElementById('rec-reason').value;
+        const start = document.getElementById('rec-start').value || null;
+        const end = document.getElementById('rec-end').value || null;
+
+        if (!STATE.recurrences[currentUser.id]) STATE.recurrences[currentUser.id] = [];
+        const rec = { day, reason, start, end, id: Date.now() };
+        STATE.recurrences[currentUser.id].push(rec);
+
+        // Apply recurrence
+        applyRecurrence(currentUser.id, rec);
+        save();
+        renderAvailCalendar();
+        // Reset form
+        document.getElementById('rec-day').value = '';
+        document.getElementById('rec-start').value = '';
+        document.getElementById('rec-end').value = '';
+    }
+
+    function applyRecurrence(personId, rec) {
+        const allDays = getAllWeekdays();
+        for (const ds of allDays) {
+            const d = parseDate(ds);
+            if (d.getDay() !== rec.day) continue;
+            if (rec.start && ds < rec.start) continue;
+            if (rec.end && ds > rec.end) continue;
+            if (isHoliday(ds)) continue;
+            setAvail(personId, ds, { available: false, reason: rec.reason, recurring: true });
+        }
+    }
+
+    function deleteRecurrence(recId) {
+        if (!STATE.recurrences[currentUser.id]) return;
+        STATE.recurrences[currentUser.id] = STATE.recurrences[currentUser.id].filter(r => r.id !== recId);
+        // Reapply all recurrences (clear recurring marks first)
+        reapplyAllRecurrences(currentUser.id);
+        save();
+        renderAvailCalendar();
+    }
+
+    function reapplyAllRecurrences(personId) {
+        // Clear all recurring marks
+        const avail = STATE.availability[personId] || {};
+        for (const ds of Object.keys(avail)) {
+            if (avail[ds] && avail[ds].recurring) {
+                delete avail[ds];
+            }
+        }
+        // Reapply
+        const recs = STATE.recurrences[personId] || [];
+        for (const rec of recs) {
+            applyRecurrence(personId, rec);
+        }
+    }
+
+    function renderRecurrenceList() {
+        const container = document.getElementById('recurrence-list');
+        const recs = STATE.recurrences[currentUser.id] || [];
+        if (recs.length === 0) {
+            container.innerHTML = '<p class="text-gray text-sm">Geen terugkerende afwezigheden ingesteld.</p>';
+            return;
+        }
+        let html = '';
+        for (const rec of recs) {
+            const dayName = DAY_NAMES_FULL[rec.day] || '?';
+            const reasonLabel = REASON_LABELS[rec.reason] || rec.reason;
+            let range = 'heel het jaar';
+            if (rec.start && rec.end) range = rec.start + ' t/m ' + rec.end;
+            else if (rec.start) range = 'vanaf ' + rec.start;
+            else if (rec.end) range = 't/m ' + rec.end;
+            html += '<div class="recurrence-item">';
+            html += '<span>Elke <strong>' + dayName + '</strong> — ' + escHtml(reasonLabel) + ' (' + range + ')</span>';
+            html += '<button class="btn btn-danger btn-sm" onclick="deleteRecurrence(' + rec.id + ')">Verwijderen</button>';
+            html += '</div>';
+        }
+        container.innerHTML = html;
+    }
+
+    // ============================================================
+    // PERSONNEL MANAGEMENT
+    // ============================================================
+    function renderPersonnelList() {
+        const container = document.getElementById('personnel-list');
+        let html = '';
+        for (const p of STATE.personnel) {
+            html += '<div class="flex justify-between items-center p-2 rounded mb-2" style="background:var(--gray-light);">';
+            html += '<div><strong>' + escHtml(p.name) + '</strong>';
+            if (p.isAdmin) html += ' <span class="badge badge-blue">Beheerder</span>';
+            if (p.targetDays) html += ' <span class="text-sm text-gray ml-2">(' + p.targetDays + ' doeldagen)</span>';
+            html += '</div>';
+            html += '<div class="flex gap-2">';
+            html += '<button class="btn btn-blue btn-sm" onclick="openEditPerson(' + p.id + ')">Bewerken</button>';
+            html += '<button class="btn btn-danger btn-sm" onclick="deletePerson(' + p.id + ')">Verwijderen</button>';
+            html += '</div></div>';
+        }
+        container.innerHTML = html;
+    }
+
+    function addPerson() {
+        const name = document.getElementById('new-person-name').value.trim();
+        const pass = document.getElementById('new-person-pass').value;
+        const isAdmin = document.getElementById('new-person-admin').checked;
+        const targetDays = parseInt(document.getElementById('new-person-target').value) || 0;
+        if (!name || !pass) { alert('Vul naam en wachtwoord in.'); return; }
+        STATE.personnel.push({ id: STATE.nextPersonId++, name, password: pass, isAdmin, targetDays: targetDays || null });
+        save();
+        document.getElementById('new-person-name').value = '';
+        document.getElementById('new-person-pass').value = '';
+        document.getElementById('new-person-target').value = '';
+        document.getElementById('new-person-admin').checked = false;
+        renderPersonnelList();
+    }
+
+    function openEditPerson(id) {
+        editingPersonId = id;
+        const p = STATE.personnel.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('edit-person-name').value = p.name;
+        document.getElementById('edit-person-pass').value = p.password;
+        document.getElementById('edit-person-target').value = p.targetDays || '';
+        document.getElementById('edit-person-admin').checked = p.isAdmin;
+        document.getElementById('modal-edit-person').classList.remove('hidden');
+    }
+
+    function saveEditPerson() {
+        const p = STATE.personnel.find(x => x.id === editingPersonId);
+        if (!p) return;
+        p.name = document.getElementById('edit-person-name').value.trim();
+        p.password = document.getElementById('edit-person-pass').value;
+        p.targetDays = parseInt(document.getElementById('edit-person-target').value) || null;
+        p.isAdmin = document.getElementById('edit-person-admin').checked;
+        save();
+        closeEditPersonModal();
+        renderPersonnelList();
+    }
+
+    function closeEditPersonModal() {
+        document.getElementById('modal-edit-person').classList.add('hidden');
+        editingPersonId = null;
+    }
+
+    function deletePerson(id) {
+        if (!confirm('Weet je zeker dat je deze medewerker wilt verwijderen?')) return;
+        STATE.personnel = STATE.personnel.filter(p => p.id !== id);
+        delete STATE.availability[id];
+        delete STATE.recurrences[id];
+        save();
+        renderPersonnelList();
+    }
+
+    // ============================================================
+    // TASKS & LOCATIONS
+    // ============================================================
+    function renderTasksAndLocations() {
+        // Locations
+        let html = '';
+        for (const loc of STATE.locations) {
+            html += '<div class="flex justify-between items-center p-2 rounded mb-2" style="background:var(--gray-light);">';
+            html += '<span>' + escHtml(loc) + '</span>';
+            html += '<button class="btn btn-danger btn-sm" onclick="deleteLocation(\'' + escHtml(loc) + '\')">Verwijderen</button>';
+            html += '</div>';
+        }
+        document.getElementById('location-list').innerHTML = html;
+
+        // Update task location dropdown
+        const locSel = document.getElementById('new-task-loc');
+        locSel.innerHTML = '';
+        for (const loc of STATE.locations) {
+            locSel.innerHTML += '<option value="' + escHtml(loc) + '">' + escHtml(loc) + '</option>';
+        }
+
+        // Tasks
+        html = '';
+        for (let i = 0; i < STATE.tasks.length; i++) {
+            const t = STATE.tasks[i];
+            const days = (t.activeDays || [1,2,3,4,5]).map(d => DAY_NAMES[d]).join(', ');
+            html += '<div class="flex justify-between items-center p-2 rounded mb-2" style="background:var(--gray-light);">';
+            html += '<div><strong class="' + getTaskColor(i) + '" style="padding:2px 6px;border-radius:3px;">' + escHtml(t.name) + '</strong>';
+            html += ' <span class="text-gray text-sm">(' + escHtml(t.location) + ') — ' + days + '</span></div>';
+            html += '<div class="flex gap-2">';
+            html += '<button class="btn btn-amber btn-sm" onclick="openTaskDays(' + t.id + ')">Actieve dagen</button>';
+            html += '<button class="btn btn-danger btn-sm" onclick="deleteTask(' + t.id + ')">Verwijderen</button>';
+            html += '</div></div>';
+        }
+        document.getElementById('task-list').innerHTML = html;
+    }
+
+    function addLocation() {
+        const name = document.getElementById('new-location').value.trim();
+        if (!name) return;
+        if (STATE.locations.includes(name)) { alert('Locatie bestaat al.'); return; }
+        STATE.locations.push(name);
+        save();
+        document.getElementById('new-location').value = '';
+        renderTasksAndLocations();
+    }
+
+    function deleteLocation(name) {
+        if (!confirm('Locatie "' + name + '" verwijderen?')) return;
+        STATE.locations = STATE.locations.filter(l => l !== name);
+        save();
+        renderTasksAndLocations();
+    }
+
+    function addTask() {
+        const name = document.getElementById('new-task-name').value.trim();
+        const loc = document.getElementById('new-task-loc').value;
+        if (!name) return;
+        STATE.tasks.push({ id: STATE.nextTaskId++, name, location: loc, activeDays: [1,2,3,4,5] });
+        save();
+        document.getElementById('new-task-name').value = '';
+        renderTasksAndLocations();
+    }
+
+    function deleteTask(id) {
+        if (!confirm('Deze taak verwijderen?')) return;
+        STATE.tasks = STATE.tasks.filter(t => t.id !== id);
+        save();
+        renderTasksAndLocations();
+    }
+
+    function openTaskDays(taskId) {
+        editingTaskId = taskId;
+        const task = STATE.tasks.find(t => t.id === taskId);
+        if (!task) return;
+        document.getElementById('task-days-title').textContent = 'Actieve dagen — ' + task.name;
+        for (let d = 1; d <= 5; d++) {
+            document.getElementById('td-' + d).checked = (task.activeDays || [1,2,3,4,5]).includes(d);
+        }
+        document.getElementById('modal-task-days').classList.remove('hidden');
+    }
+
+    function saveTaskDays() {
+        const task = STATE.tasks.find(t => t.id === editingTaskId);
+        if (!task) return;
+        task.activeDays = [];
+        for (let d = 1; d <= 5; d++) {
+            if (document.getElementById('td-' + d).checked) task.activeDays.push(d);
+        }
+        save();
+        closeTaskDaysModal();
+        renderTasksAndLocations();
+    }
+
+    function closeTaskDaysModal() {
+        document.getElementById('modal-task-days').classList.add('hidden');
+        editingTaskId = null;
+    }
+
+    // ============================================================
+    // HOLIDAYS
+    // ============================================================
+    function renderHolidays() {
+        let html = '';
+        const sorted = [...STATE.holidays].sort((a, b) => a.date.localeCompare(b.date));
+        for (const h of sorted) {
+            html += '<div class="flex justify-between items-center p-2 rounded mb-2" style="background:var(--amber-light);">';
+            html += '<span><strong>' + escHtml(h.name) + '</strong> — ' + formatDateNL(h.date) + '</span>';
+            html += '<button class="btn btn-danger btn-sm" onclick="deleteHoliday(\'' + h.date + '\')">Verwijderen</button>';
+            html += '</div>';
+        }
+        document.getElementById('holiday-list').innerHTML = html || '<p class="text-gray text-sm">Geen feestdagen ingesteld.</p>';
+    }
+
+    function addHoliday() {
+        const date = document.getElementById('new-holiday-date').value;
+        const name = document.getElementById('new-holiday-name').value.trim();
+        if (!date || !name) { alert('Vul datum en naam in.'); return; }
+        if (STATE.holidays.find(h => h.date === date)) { alert('Er is al een feestdag op deze datum.'); return; }
+        STATE.holidays.push({ date, name });
+        save();
+        document.getElementById('new-holiday-date').value = '';
+        document.getElementById('new-holiday-name').value = '';
+        renderHolidays();
+    }
+
+    function deleteHoliday(date) {
+        STATE.holidays = STATE.holidays.filter(h => h.date !== date);
+        save();
+        renderHolidays();
+    }
+
+    // ============================================================
+    // AVAILABILITY OVERVIEW (Admin)
+    // ============================================================
+    function renderOverview() {
+        const allDays = getAllWeekdays();
+        const pageSize = 20;
+        const start = overviewPage * pageSize;
+        const pageDays = allDays.slice(start, start + pageSize);
+
+        document.getElementById('overview-range').textContent =
+            (pageDays.length > 0 ? formatDateNL(pageDays[0]) + ' — ' + formatDateNL(pageDays[pageDays.length - 1]) : 'Geen data') +
+            ' (pagina ' + (overviewPage + 1) + '/' + Math.ceil(allDays.length / pageSize) + ')';
+
+        let html = '<table><thead><tr><th>Medewerker</th>';
+        for (const ds of pageDays) {
+            const d = parseDate(ds);
+            const hol = isHoliday(ds);
+            html += '<th style="writing-mode:vertical-lr;font-size:0.65rem;' + (hol ? 'background:var(--amber-light);' : '') + '">' +
+                d.getDate() + '/' + (d.getMonth()+1) + '</th>';
+        }
+        html += '</tr></thead><tbody>';
+
+        for (const p of STATE.personnel) {
+            if (p.isAdmin && p.name === 'Admin') continue; // Skip admin-only account
+            html += '<tr><td style="white-space:nowrap;">' + escHtml(p.name) + '</td>';
+            for (const ds of pageDays) {
+                const hol = isHoliday(ds);
+                if (hol) {
+                    html += '<td class="avail-holiday text-center" title="' + escHtml(hol.name) + '">F</td>';
+                    continue;
+                }
+                const avail = getAvail(p.id, ds);
+                let cls = '';
+                let label = '';
+                let title = formatDateNL(ds);
+                if (avail) {
+                    if (avail.available) { cls = 'avail-yes'; label = '&#10003;'; }
+                    else {
+                        cls = 'avail-no'; label = '&#10007;';
+                        if (avail.reason) title += ' — ' + (REASON_LABELS[avail.reason] || avail.reason);
+                    }
+                }
+                html += '<td class="' + cls + ' text-center" style="cursor:pointer;" title="' + escHtml(title) + '" onclick="adminToggleAvail(' + p.id + ',\'' + ds + '\')">' + label + '</td>';
+            }
+            html += '</tr>';
+        }
+        html += '</tbody></table>';
+        document.getElementById('overview-table-wrap').innerHTML = html;
+    }
+
+    function adminToggleAvail(personId, ds) {
+        if (isHoliday(ds)) return;
+        const avail = getAvail(personId, ds);
+        if (avail && avail.available) {
+            setAvail(personId, ds, { available: false, reason: 'anders' });
+        } else {
+            setAvail(personId, ds, { available: true });
+        }
+        save();
+        renderOverview();
+    }
+
+    function overviewPrev() { if (overviewPage > 0) { overviewPage--; renderOverview(); } }
+    function overviewNext() {
+        const total = getAllWeekdays().length;
+        if ((overviewPage + 1) * 20 < total) { overviewPage++; renderOverview(); }
+    }
+
+    // ============================================================
+    // ROSTER GENERATION
+    // ============================================================
+    // ============================================================
+    // ROSTER GENERATION (AI + LOCAL)
+    // ============================================================
+
+    // Toggle API key visibility based on method selection
+    function initRosterGenPanel() {
+        document.getElementById('gen-apikey').value = STATE.apiKey || '';
+        const methodSel = document.getElementById('gen-method');
+        methodSel.onchange = updateGenMethodUI;
+        updateGenMethodUI();
+        // Set up char counter on prompt editor
+        const editor = document.getElementById('prompt-editor');
+        editor.addEventListener('input', updatePromptCharCount);
+    }
+
+    function updateGenMethodUI() {
+        const method = document.getElementById('gen-method').value;
+        document.getElementById('api-key-section').classList.toggle('hidden', method !== 'ai');
+        document.getElementById('prompt-section').classList.toggle('hidden', method !== 'ai');
+        document.getElementById('paste-section').classList.toggle('hidden', method !== 'ai');
+        // Show optimize button only for AI method when roster exists
+        const hasRoster = STATE.roster && Object.keys(STATE.roster).length > 0;
+        document.getElementById('btn-optimize').classList.toggle('hidden', method !== 'ai' || !hasRoster);
+        // Auto-load prompt when switching to AI mode
+        if (method === 'ai') {
+            const editor = document.getElementById('prompt-editor');
+            if (!editor.value.trim()) refreshPrompt();
+        }
+    }
+
+    function refreshPrompt() {
+        const prompt = buildPrompt();
+        document.getElementById('prompt-editor').value = prompt;
+        updatePromptCharCount();
+    }
+
+    function updatePromptCharCount() {
+        const len = document.getElementById('prompt-editor').value.length;
+        const tokens = Math.round(len / 4); // rough estimate
+        document.getElementById('prompt-charcount').textContent = len.toLocaleString() + ' tekens (~' + tokens.toLocaleString() + ' tokens)';
+    }
+
+    function generateRoster() {
+        const method = document.getElementById('gen-method').value;
+        if (method === 'ai') {
+            generateRosterAI();
+        } else {
+            generateRosterLocal();
+        }
+    }
+
+    // --- LOCAL ALGORITHM ---
+    function generateRosterLocal() {
+        const btn = document.getElementById('btn-generate');
+        btn.disabled = true; btn.textContent = 'Genereren...';
+        showGenStatus('', 'Rooster wordt lokaal gegenereerd...');
+
+        setTimeout(() => {
+            try {
+                const result = runRosterAlgorithm();
+                STATE.roster = result.roster;
+                save();
+                renderRosterEditor();
+                showGenStats(result.stats);
+                showGenStatus('success', 'Rooster succesvol gegenereerd (lokaal algoritme)!');
+            } catch(e) {
+                showGenStatus('error', 'Fout bij genereren: ' + e.message);
+                console.error(e);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Rooster genereren';
+            }
+        }, 50);
+    }
+
+    // --- CLAUDE AI GENERATION ---
+    function buildPrompt() {
+        const personnel = STATE.personnel.filter(p => !(p.isAdmin && p.name === 'Admin'));
+        const allDays = getAllWeekdays().filter(ds => !isHoliday(ds));
+        const totalWorkdays = allDays.length;
+
+        // --- Compressed availability: only list EXCEPTIONS ---
+        // Group unavailable days into date ranges for compactness
+        function compressDateList(dates) {
+            if (dates.length === 0) return '';
+            dates.sort();
+            const ranges = [];
+            let start = dates[0], prev = dates[0];
+            for (let i = 1; i < dates.length; i++) {
+                const prevD = parseDate(prev);
+                const curD = parseDate(dates[i]);
+                // Check if consecutive weekday (allow weekend gaps)
+                const diffMs = curD - prevD;
+                const diffDays = diffMs / (1000*60*60*24);
+                if (diffDays <= 3) { // consecutive weekday (max Fri->Mon = 3 days)
+                    prev = dates[i];
+                } else {
+                    ranges.push(start === prev ? start : start + ' t/m ' + prev);
+                    start = dates[i];
+                    prev = dates[i];
+                }
+            }
+            ranges.push(start === prev ? start : start + ' t/m ' + prev);
+            return ranges.join(', ');
+        }
+
+        let personnelSection = '';
+        for (const p of personnel) {
+            const unavailDays = [];
+            const prefDays = {}; // taskPref -> [dates], locPref -> [dates]
+            const reasonDays = {}; // reason -> [dates]
+
+            for (const ds of allDays) {
+                const a = getAvail(p.id, ds);
+                if (a && a.available === false) {
+                    unavailDays.push(ds);
+                    if (a.reason && REASON_LABELS[a.reason]) {
+                        if (!reasonDays[REASON_LABELS[a.reason]]) reasonDays[REASON_LABELS[a.reason]] = [];
+                        reasonDays[REASON_LABELS[a.reason]].push(ds);
+                    }
+                }
+                if (a && a.taskPreference) {
+                    const key = 'taakvoorkeur: ' + a.taskPreference;
+                    if (!prefDays[key]) prefDays[key] = [];
+                    prefDays[key].push(ds);
+                }
+                if (a && a.locationPreference) {
+                    const key = 'locatievoorkeur: ' + a.locationPreference;
+                    if (!prefDays[key]) prefDays[key] = [];
+                    prefDays[key].push(ds);
+                }
+            }
+
+            personnelSection += '\n' + p.name + ' (id:' + p.id;
+            if (p.targetDays) personnelSection += ', doeldagen: ' + p.targetDays;
+            personnelSection += ')';
+
+            if (unavailDays.length === 0 && Object.keys(prefDays).length === 0) {
+                personnelSection += '\n  Volledig beschikbaar, geen voorkeuren.\n';
+            } else {
+                if (unavailDays.length > 0) {
+                    // Group by reason if available
+                    if (Object.keys(reasonDays).length > 0) {
+                        for (const [reason, dates] of Object.entries(reasonDays)) {
+                            personnelSection += '\n  Niet beschikbaar (' + reason + '): ' + compressDateList(dates);
+                        }
+                        // Any without reason
+                        const withReason = Object.values(reasonDays).flat();
+                        const noReason = unavailDays.filter(d => !withReason.includes(d));
+                        if (noReason.length > 0) {
+                            personnelSection += '\n  Niet beschikbaar: ' + compressDateList(noReason);
+                        }
+                    } else {
+                        personnelSection += '\n  Niet beschikbaar: ' + compressDateList(unavailDays);
+                    }
+                }
+                for (const [pref, dates] of Object.entries(prefDays)) {
+                    personnelSection += '\n  ' + pref + ': ' + compressDateList(dates);
+                }
+                personnelSection += '\n';
+            }
+        }
+
+        const taskInfo = STATE.tasks.map(t => t.name + ' (' + t.location + ') — actief op: ' +
+            t.activeDays.map(d => DAY_NAMES_FULL[d]).join(', ')).join('\n- ');
+
+        const targetInfo = personnel.filter(p => p.targetDays).map(p =>
+            '- ' + p.name + ' (id:' + p.id + '): ' + p.targetDays + ' dagen/jaar'
+        ).join('\n');
+
+        return `Je bent een ziekenhuis-roosterplanning expert. Genereer een optimaal rooster voor ${STATE.rosterYear}.
+
+JAAR: ${STATE.rosterYear} (${totalWorkdays} werkdagen, ma-vr, exclusief feestdagen)
+LOCATIES: ${STATE.locations.join(', ')}
+
+TAKEN:
+- ${taskInfo}
+
+DOELDAGEN PER PERSOON (optimaal aantal ingeroosterde dagen/jaar):
+${targetInfo || '(niet ingesteld — verdeel gelijkmatig over alle medewerkers)'}
+
+MEDEWERKERS & BESCHIKBAARHEID:
+(Iedereen is standaard beschikbaar op alle werkdagen, tenzij hieronder anders vermeld)
+${personnelSection}
+FEESTDAGEN (vrij, niet inroosteren): ${STATE.holidays.map(h => h.date + ' (' + h.name + ')').join(', ')}
+
+REGELS:
+1. HARD: Nooit iemand inroosteren op een dag dat die niet beschikbaar is
+2. HARD: Maximaal één taak per persoon per dag
+3. HARD: Feestdagen overslaan
+4. HARD: Taken alleen op hun actieve dagen
+5. DOELDAGEN: Elke persoon moet dicht bij hun doelantal dagen ingeroosterd worden. Personen zonder doel krijgen een gelijk deel van de resterende dagen. Dit is zeer belangrijk.
+6. CONTINUÏTEIT: Minimaliseer personwisselingen per taak per week. Ideaal: 1 persoon per taak per hele week (ma-vr).
+7. BALANS: Na doeldagen, verdeel taken en locaties gelijkmatig.
+8. ZACHT: Respecteer taak- en locatievoorkeuren waar mogelijk.
+
+ANTWOORDFORMAAT (alleen geldige JSON, geen markdown, geen uitleg):
+{
+  "roster": {
+    "YYYY-MM-DD": {
+      "TaakNaam": persoonId_nummer,
+      ...
+    },
+    ...
+  }
+}
+
+Persoon IDs: ${personnel.map(p => p.id + '="' + p.name + '"').join(', ')}
+
+Genereer het volledige rooster voor het hele jaar.`;
+    }
+
+    async function generateRosterAI() {
+        const apiKey = document.getElementById('gen-apikey').value.trim();
+        if (!apiKey) {
+            showGenStatus('error', 'Vul eerst een Claude API-sleutel in.');
+            document.getElementById('paste-section').classList.remove('hidden');
+            return;
+        }
+        STATE.apiKey = apiKey;
+        save();
+
+        // Use the edited prompt from the textarea
+        let prompt = document.getElementById('prompt-editor').value.trim();
+        if (!prompt) {
+            prompt = buildPrompt();
+            document.getElementById('prompt-editor').value = prompt;
+            updatePromptCharCount();
+        }
+
+        const btn = document.getElementById('btn-generate');
+        btn.disabled = true; btn.textContent = 'Genereren met AI...';
+        showGenStatus('', 'Rooster wordt gegenereerd met Claude AI, dit kan even duren...');
+
+        try {
+            const resp = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 16000,
+                    system: 'You are a hospital roster scheduling assistant. Always respond with valid JSON only, no markdown, no explanation.',
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            if (!resp.ok) {
+                const e = await resp.json().catch(() => ({}));
+                throw new Error(e.error?.message || 'API fout: ' + resp.status);
+            }
+            const data = await resp.json();
+            const text = data.content[0].text;
+            processRosterJSON(text);
+            showGenStatus('success', 'Rooster succesvol gegenereerd met Claude AI!');
+        } catch(e) {
+            showGenStatus('error', 'AI-fout: ' + e.message + ' — Probeer de prompt te kopiëren en handmatig te plakken.');
+            document.getElementById('paste-section').classList.remove('hidden');
+        } finally {
+            btn.disabled = false; btn.textContent = 'Rooster genereren';
+        }
+    }
+
+    async function optimizeRoster() {
+        const apiKey = document.getElementById('gen-apikey').value.trim() || STATE.apiKey;
+        if (!apiKey) { showGenStatus('error', 'Vul eerst een Claude API-sleutel in.'); return; }
+        const btn = document.getElementById('btn-optimize');
+        btn.disabled = true; btn.textContent = 'Optimaliseren...';
+        showGenStatus('', 'Rooster wordt geoptimaliseerd met Claude AI...');
+
+        const personnel = STATE.personnel.filter(p => !(p.isAdmin && p.name === 'Admin'));
+        const targetInfo = personnel.filter(p => p.targetDays).map(p =>
+            '- ' + p.name + ' (id:' + p.id + '): ' + p.targetDays + ' doeldagen/jaar'
+        ).join('\n');
+
+        try {
+            const prompt = `Here is the current roster:\n${JSON.stringify(STATE.roster, null, 2)}\n\nPerson IDs: ${personnel.map(p => p.id + '="' + p.name + '"').join(', ')}\n\nTARGET DAYS PER PERSON:\n${targetInfo || '(none set — distribute equally)'}\n\nPlease optimize it to:\n1. Better match each person's target days (very important)\n2. Better respect preferences\n3. Improve balance\n4. Reduce handovers/task switches within weeks\n5. Keep all hard constraints (availability, holidays, one task per person per day)\n\nReturn the optimized roster in the same JSON format. Valid JSON only, no markdown.`;
+            const resp = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514', max_tokens: 16000,
+                    system: 'You are a hospital roster scheduling assistant. Always respond with valid JSON only, no markdown.',
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
+            if (!resp.ok) throw new Error('API fout: ' + resp.status);
+            const data = await resp.json();
+            processRosterJSON(data.content[0].text);
+            showGenStatus('success', 'Rooster geoptimaliseerd met AI!');
+        } catch(e) {
+            showGenStatus('error', 'Optimalisatie fout: ' + e.message);
+        } finally {
+            btn.disabled = false; btn.textContent = 'Rooster optimaliseren met AI';
+        }
+    }
+
+    function processRosterJSON(text) {
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('Geen geldig JSON gevonden in het antwoord.');
+        const parsed = JSON.parse(match[0]);
+        STATE.roster = parsed.roster || parsed;
+        save();
+        renderRosterEditor();
+        // Compute and show stats
+        const personnel = STATE.personnel.filter(p => !(p.isAdmin && p.name === 'Admin'));
+        const allDays = getAllWeekdays().filter(ds => !isHoliday(ds));
+        const stats = computeRosterStats(STATE.roster, allDays, personnel, STATE.tasks);
+        showGenStats(stats);
+    }
+
+    function processPastedResponse() {
+        const text = document.getElementById('paste-response').value.trim();
+        if (!text) { alert('Plak eerst het JSON-antwoord.'); return; }
+        try {
+            processRosterJSON(text);
+            showGenStatus('success', 'Rooster succesvol verwerkt!');
+        } catch(e) {
+            showGenStatus('error', 'Verwerkingsfout: ' + e.message);
+        }
+    }
+
+    function copyPrompt() {
+        let prompt = document.getElementById('prompt-editor').value.trim();
+        if (!prompt) prompt = buildPrompt();
+        navigator.clipboard.writeText(prompt).then(() => {
+            alert('Prompt gekopieerd naar klembord! Plak het in Claude en plak het antwoord terug.');
+        }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = prompt; document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+            alert('Prompt gekopieerd!');
+        });
+    }
+
+    function runRosterAlgorithm() {
+        const personnel = STATE.personnel.filter(p => !(p.isAdmin && p.name === 'Admin'));
+        const tasks = STATE.tasks;
+        if (personnel.length === 0) throw new Error('Voeg eerst medewerkers toe.');
+        if (tasks.length === 0) throw new Error('Voeg eerst taken toe.');
+
+        const allDays = getAllWeekdays().filter(ds => !isHoliday(ds));
+        if (allDays.length === 0) throw new Error('Geen werkdagen gevonden voor dit jaar.');
+
+        const roster = {};
+        // Track how many days each person is assigned (for balance)
+        const personTaskCount = {}; // personId -> total assignments
+        const personLocCount = {};  // personId -> { location -> count }
+        for (const p of personnel) {
+            personTaskCount[p.id] = 0;
+            personLocCount[p.id] = {};
+            for (const loc of STATE.locations) personLocCount[p.id][loc] = 0;
+        }
+
+        // Group days into weeks (Mon-Fri blocks)
+        const weeks = [];
+        let currentWeek = [];
+        for (const ds of allDays) {
+            const d = parseDate(ds);
+            const dow = d.getDay(); // 1=Mon ... 5=Fri
+            if (dow === 1 && currentWeek.length > 0) {
+                weeks.push(currentWeek);
+                currentWeek = [];
+            }
+            currentWeek.push(ds);
+        }
+        if (currentWeek.length > 0) weeks.push(currentWeek);
+
+        // For each task, try to assign one person per week for continuity
+        // Process task by task, week by week
+        const dayAssignments = {}; // ds -> Set of personIds already assigned that day
+        for (const ds of allDays) dayAssignments[ds] = new Set();
+
+        // Shuffle tasks for fairness across multiple runs
+        const taskOrder = [...tasks];
+
+        for (const task of taskOrder) {
+            for (const week of weeks) {
+                // Filter days in this week where this task is active
+                const activeDays = week.filter(ds => {
+                    const d = parseDate(ds);
+                    return (task.activeDays || [1,2,3,4,5]).includes(d.getDay());
+                });
+                if (activeDays.length === 0) continue;
+
+                // Find candidates: people available for ALL days this week (ideal)
+                // or at least most days
+                const candidateScores = [];
+                for (const p of personnel) {
+                    let availCount = 0;
+                    let prefScore = 0;
+                    let canDoAny = false;
+
+                    for (const ds of activeDays) {
+                        const a = getAvail(p.id, ds);
+                        const isAvailable = a ? a.available : true; // Default: available if not set
+                        const notAssigned = !dayAssignments[ds].has(p.id);
+                        if (isAvailable && notAssigned) {
+                            availCount++;
+                            canDoAny = true;
+                            // Preference bonus
+                            if (a && a.taskPreference === task.name) prefScore += 2;
+                            if (a && a.locationPreference === task.location) prefScore += 1;
+                        }
+                    }
+
+                    if (!canDoAny) continue;
+
+                    // Target days scoring: how far below target is this person?
+                    // Higher = more room to assign, should be preferred
+                    let targetScore = 0;
+                    if (p.targetDays) {
+                        const remaining = p.targetDays - personTaskCount[p.id];
+                        targetScore = remaining > 0 ? remaining : remaining * 3; // Penalize going over target heavily
+                    } else {
+                        // No target: use general balance (prefer less-assigned)
+                        targetScore = -personTaskCount[p.id];
+                    }
+                    // Location balance
+                    const locBalance = -(personLocCount[p.id][task.location] || 0);
+
+                    candidateScores.push({
+                        person: p,
+                        availCount,
+                        prefScore,
+                        targetScore,
+                        locBalance,
+                        // Composite: prioritize full-week availability, then target adherence, then preferences
+                        score: availCount * 100 + targetScore * 10 + locBalance * 5 + prefScore * 3 + Math.random() * 2
+                    });
+                }
+
+                // Sort by score descending
+                candidateScores.sort((a, b) => b.score - a.score);
+
+                if (candidateScores.length === 0) continue;
+
+                // Pick the best candidate for the whole week
+                const primary = candidateScores[0];
+
+                // Assign primary to all days they're available
+                const unfilledDays = [];
+                for (const ds of activeDays) {
+                    const a = getAvail(primary.person.id, ds);
+                    const isAvailable = a ? a.available : true;
+                    const notAssigned = !dayAssignments[ds].has(primary.person.id);
+
+                    if (isAvailable && notAssigned) {
+                        if (!roster[ds]) roster[ds] = {};
+                        roster[ds][task.name] = primary.person.id;
+                        dayAssignments[ds].add(primary.person.id);
+                        personTaskCount[primary.person.id]++;
+                        personLocCount[primary.person.id][task.location] = (personLocCount[primary.person.id][task.location] || 0) + 1;
+                    } else {
+                        unfilledDays.push(ds);
+                    }
+                }
+
+                // Fill remaining days with backup candidates
+                for (const ds of unfilledDays) {
+                    let assigned = false;
+                    for (const cand of candidateScores) {
+                        if (cand.person.id === primary.person.id) continue;
+                        const a = getAvail(cand.person.id, ds);
+                        const isAvailable = a ? a.available : true;
+                        const notAssigned = !dayAssignments[ds].has(cand.person.id);
+                        if (isAvailable && notAssigned) {
+                            if (!roster[ds]) roster[ds] = {};
+                            roster[ds][task.name] = cand.person.id;
+                            dayAssignments[ds].add(cand.person.id);
+                            personTaskCount[cand.person.id]++;
+                            personLocCount[cand.person.id][task.location] = (personLocCount[cand.person.id][task.location] || 0) + 1;
+                            assigned = true;
+                            break;
+                        }
+                    }
+                    // If still not assigned, try ANY available person
+                    if (!assigned) {
+                        for (const p of personnel) {
+                            const a = getAvail(p.id, ds);
+                            const isAvailable = a ? a.available : true;
+                            const notAssigned = !dayAssignments[ds].has(p.id);
+                            if (isAvailable && notAssigned) {
+                                if (!roster[ds]) roster[ds] = {};
+                                roster[ds][task.name] = p.id;
+                                dayAssignments[ds].add(p.id);
+                                personTaskCount[p.id]++;
+                                personLocCount[p.id][task.location] = (personLocCount[p.id][task.location] || 0) + 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---- Optimization pass: improve balance via swaps ----
+        for (let pass = 0; pass < 3; pass++) {
+            for (const task of tasks) {
+                // Find the most-assigned and least-assigned person for this task
+                const taskCounts = {};
+                for (const p of personnel) taskCounts[p.id] = 0;
+                for (const ds of allDays) {
+                    if (roster[ds] && roster[ds][task.name]) {
+                        taskCounts[roster[ds][task.name]]++;
+                    }
+                }
+                const sorted = personnel.map(p => ({ id: p.id, count: taskCounts[p.id] })).sort((a, b) => b.count - a.count);
+                if (sorted.length < 2) continue;
+
+                const overloaded = sorted[0];
+                const underloaded = sorted[sorted.length - 1];
+                if (overloaded.count - underloaded.count <= 2) continue; // Close enough
+
+                // Try to swap some assignments from overloaded to underloaded
+                for (const week of weeks) {
+                    if (overloaded.count - underloaded.count <= 2) break;
+                    const activeDays = week.filter(ds => {
+                        const d = parseDate(ds);
+                        return (task.activeDays || [1,2,3,4,5]).includes(d.getDay());
+                    });
+
+                    // Check if overloaded person is assigned this whole week
+                    const overloadedDays = activeDays.filter(ds => roster[ds] && roster[ds][task.name] === overloaded.id);
+                    if (overloadedDays.length === 0) continue;
+
+                    // Check if underloaded can take all those days
+                    let canSwap = true;
+                    for (const ds of overloadedDays) {
+                        const a = getAvail(underloaded.id, ds);
+                        const isAvailable = a ? a.available : true;
+                        if (!isAvailable || dayAssignments[ds].has(underloaded.id)) {
+                            // Check if underloaded is assigned to something else that day
+                            let hasOtherTask = false;
+                            for (const t of tasks) {
+                                if (t.name !== task.name && roster[ds] && roster[ds][t.name] === underloaded.id) {
+                                    hasOtherTask = true; break;
+                                }
+                            }
+                            if (!isAvailable || hasOtherTask) { canSwap = false; break; }
+                        }
+                    }
+
+                    if (canSwap) {
+                        for (const ds of overloadedDays) {
+                            roster[ds][task.name] = underloaded.id;
+                            dayAssignments[ds].delete(overloaded.id);
+                            dayAssignments[ds].add(underloaded.id);
+                            overloaded.count--;
+                            underloaded.count++;
+                            personTaskCount[overloaded.id]--;
+                            personTaskCount[underloaded.id]++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---- Compute statistics ----
+        const stats = computeRosterStats(roster, allDays, personnel, tasks);
+
+        return { roster, stats };
+    }
+
+    function computeRosterStats(roster, allDays, personnel, tasks) {
+        const stats = { totalSlots: 0, filledSlots: 0, personCounts: {}, taskCounts: {}, handovers: 0 };
+
+        for (const p of personnel) stats.personCounts[p.id] = { name: p.name, total: 0, targetDays: p.targetDays || null };
+        for (const t of tasks) stats.taskCounts[t.name] = {};
+
+        for (const ds of allDays) {
+            for (const task of tasks) {
+                const d = parseDate(ds);
+                if (!(task.activeDays || [1,2,3,4,5]).includes(d.getDay())) continue;
+                stats.totalSlots++;
+                if (roster[ds] && roster[ds][task.name]) {
+                    stats.filledSlots++;
+                    const pid = roster[ds][task.name];
+                    if (stats.personCounts[pid]) stats.personCounts[pid].total++;
+                    if (!stats.taskCounts[task.name][pid]) stats.taskCounts[task.name][pid] = 0;
+                    stats.taskCounts[task.name][pid]++;
+                }
+            }
+        }
+
+        // Count handovers (person changes for same task on consecutive days)
+        for (const task of tasks) {
+            let prevPerson = null;
+            for (const ds of allDays) {
+                const d = parseDate(ds);
+                if (!(task.activeDays || [1,2,3,4,5]).includes(d.getDay())) continue;
+                const cur = roster[ds] && roster[ds][task.name];
+                if (cur && prevPerson && cur !== prevPerson) stats.handovers++;
+                prevPerson = cur || prevPerson;
+            }
+        }
+
+        return stats;
+    }
+
+    function showGenStats(stats) {
+        const el = document.getElementById('gen-stats');
+        el.classList.remove('hidden');
+        const pct = stats.totalSlots > 0 ? Math.round(stats.filledSlots / stats.totalSlots * 100) : 0;
+
+        let html = '<h4>Roosterstatistieken</h4>';
+        html += '<div class="grid-3 mb-4">';
+        html += '<div class="text-center"><div class="font-bold" style="font-size:1.5rem;color:var(--primary);">' + pct + '%</div><div class="text-sm text-gray">Bezetting</div></div>';
+        html += '<div class="text-center"><div class="font-bold" style="font-size:1.5rem;color:var(--blue);">' + stats.filledSlots + '/' + stats.totalSlots + '</div><div class="text-sm text-gray">Ingevulde slots</div></div>';
+        html += '<div class="text-center"><div class="font-bold" style="font-size:1.5rem;color:var(--amber);">' + stats.handovers + '</div><div class="text-sm text-gray">Wisselingen</div></div>';
+        html += '</div>';
+
+        // Person distribution
+        html += '<h4>Verdeling per medewerker</h4><div class="table-wrap"><table><thead><tr><th>Medewerker</th><th>Doeldagen</th><th>Totaal diensten</th><th>Verschil</th>';
+        for (const t of STATE.tasks) html += '<th>' + escHtml(t.name) + '</th>';
+        html += '</tr></thead><tbody>';
+        const sorted = Object.values(stats.personCounts).sort((a, b) => b.total - a.total);
+        for (const pc of sorted) {
+            if (pc.total === 0 && !pc.targetDays) continue;
+            const pid = Object.keys(stats.personCounts).find(k => stats.personCounts[k] === pc);
+            const target = pc.targetDays;
+            const diff = target ? pc.total - target : null;
+            const diffColor = diff === null ? 'var(--gray)' : (Math.abs(diff) <= 5 ? 'var(--success)' : 'var(--danger)');
+            const diffText = diff === null ? '—' : (diff > 0 ? '+' + diff : '' + diff);
+            html += '<tr><td>' + escHtml(pc.name) + '</td>';
+            html += '<td class="text-center">' + (target || '—') + '</td>';
+            html += '<td class="text-center font-bold">' + pc.total + '</td>';
+            html += '<td class="text-center font-bold" style="color:' + diffColor + ';">' + diffText + '</td>';
+            for (const t of STATE.tasks) {
+                const cnt = stats.taskCounts[t.name][pid] || 0;
+                html += '<td class="text-center">' + cnt + '</td>';
+            }
+            html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        el.innerHTML = html;
+    }
+
+    function publishRoster() {
+        if (!confirm('Rooster publiceren? Alle medewerkers kunnen het dan zien.')) return;
+        STATE.rosterPublished = true;
+        save();
+        document.getElementById('tab-roster').classList.remove('hidden');
+        showGenStatus('success', 'Rooster gepubliceerd!');
+    }
+
+    function showGenStatus(type, msg) {
+        const el = document.getElementById('gen-status');
+        if (!type) { el.innerHTML = '<p class="text-gray">' + escHtml(msg) + '</p>'; return; }
+        el.innerHTML = '<div class="status-msg ' + (type === 'success' ? 'status-success' : 'status-error') + '">' + escHtml(msg) + '</div>';
+
+        // Show/hide buttons
+        const hasRoster = STATE.roster && Object.keys(STATE.roster).length > 0;
+        document.getElementById('btn-optimize').classList.toggle('hidden', !hasRoster);
+        document.getElementById('btn-publish').classList.toggle('hidden', !hasRoster);
+        document.getElementById('roster-editor').classList.toggle('hidden', !hasRoster);
+    }
+
+    // ============================================================
+    // ROSTER EDITOR
+    // ============================================================
+    function renderRosterEditor() {
+        const hasRoster = STATE.roster && Object.keys(STATE.roster).length > 0;
+        document.getElementById('btn-optimize').classList.toggle('hidden', !hasRoster);
+        document.getElementById('btn-publish').classList.toggle('hidden', !hasRoster);
+        document.getElementById('roster-editor').classList.toggle('hidden', !hasRoster);
+        if (!hasRoster) return;
+
+        const allDays = getAllWeekdays().filter(ds => !isHoliday(ds));
+        const pageSize = 20;
+        const start = rosterEditorPage * pageSize;
+        const pageDays = allDays.slice(start, start + pageSize);
+
+        document.getElementById('roster-editor-range').textContent =
+            (pageDays.length > 0 ? formatDateNL(pageDays[0]) + ' — ' + formatDateNL(pageDays[pageDays.length - 1]) : '') +
+            ' (pagina ' + (rosterEditorPage + 1) + '/' + Math.ceil(allDays.length / pageSize) + ')';
+
+        let html = '<table><thead><tr><th>Datum</th>';
+        for (const t of STATE.tasks) html += '<th>' + escHtml(t.name) + '</th>';
+        html += '</tr></thead><tbody>';
+
+        for (const ds of pageDays) {
+            const d = parseDate(ds);
+            html += '<tr><td style="white-space:nowrap;">' + DAY_NAMES[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth()+1) + '</td>';
+            for (const task of STATE.tasks) {
+                const dayOfWeek = d.getDay();
+                if (!(task.activeDays || [1,2,3,4,5]).includes(dayOfWeek)) {
+                    html += '<td class="text-gray text-center">—</td>';
+                    continue;
+                }
+                const rosterDay = STATE.roster[ds] || {};
+                const assigned = rosterDay[task.name];
+                html += '<td><select class="input" style="font-size:0.75rem;padding:2px;" onchange="setRosterAssignment(\'' + ds + '\',\'' + escHtml(task.name) + '\',this.value)">';
+                html += '<option value="">—</option>';
+                for (const p of STATE.personnel) {
+                    if (p.isAdmin && p.name === 'Admin') continue;
+                    const sel = (assigned == p.id) ? ' selected' : '';
+                    html += '<option value="' + p.id + '"' + sel + '>' + escHtml(p.name) + '</option>';
+                }
+                html += '</select></td>';
+            }
+            html += '</tr>';
+        }
+        html += '</tbody></table>';
+        document.getElementById('roster-editor-table').innerHTML = html;
+    }
+
+    function setRosterAssignment(ds, taskName, personId) {
+        if (!STATE.roster[ds]) STATE.roster[ds] = {};
+        if (personId) STATE.roster[ds][taskName] = parseInt(personId);
+        else delete STATE.roster[ds][taskName];
+        save();
+    }
+
+    function rosterEditorPrev() { if (rosterEditorPage > 0) { rosterEditorPage--; renderRosterEditor(); } }
+    function rosterEditorNext() {
+        const total = getAllWeekdays().filter(ds => !isHoliday(ds)).length;
+        if ((rosterEditorPage + 1) * 20 < total) { rosterEditorPage++; renderRosterEditor(); }
+    }
+
+    // ============================================================
+    // ROSTER DISPLAY
+    // ============================================================
+    function renderRosterDisplay() {
+        document.getElementById('roster-title').textContent = 'Rooster ' + STATE.rosterYear;
+
+        // Populate filter dropdowns
+        const fperson = document.getElementById('filter-person');
+        const ftask = document.getElementById('filter-task');
+        const floc = document.getElementById('filter-loc');
+
+        const fpVal = fperson.value;
+        const ftVal = ftask.value;
+        const flVal = floc.value;
+
+        fperson.innerHTML = '<option value="">Alle medewerkers</option>';
+        for (const p of STATE.personnel) {
+            if (p.isAdmin && p.name === 'Admin') continue;
+            fperson.innerHTML += '<option value="' + p.id + '"' + (fpVal == p.id ? ' selected' : '') + '>' + escHtml(p.name) + '</option>';
+        }
+        ftask.innerHTML = '<option value="">Alle taken</option>';
+        for (const t of STATE.tasks) {
+            ftask.innerHTML += '<option value="' + escHtml(t.name) + '"' + (ftVal === t.name ? ' selected' : '') + '>' + escHtml(t.name) + '</option>';
+        }
+        floc.innerHTML = '<option value="">Alle locaties</option>';
+        for (const l of STATE.locations) {
+            floc.innerHTML += '<option value="' + escHtml(l) + '"' + (flVal === l ? ' selected' : '') + '>' + escHtml(l) + '</option>';
+        }
+
+        // Render month calendars
+        let html = '';
+        for (let m = 0; m < 12; m++) {
+            html += '<div class="card"><h3>' + MONTH_NAMES[m] + ' ' + STATE.rosterYear + '</h3>';
+            html += '<div class="grid grid-5 mb-2">';
+            html += '<div class="cal-header">Ma</div><div class="cal-header">Di</div><div class="cal-header">Wo</div><div class="cal-header">Do</div><div class="cal-header">Vr</div>';
+            html += '</div><div class="grid grid-5">';
+
+            const cells = getMonthGridCells(m, STATE.rosterYear);
+            for (const cell of cells) {
+                if (!cell) { html += '<div class="roster-day" style="border:none;background:transparent;"></div>'; continue; }
+                const ds = cell.date;
+                const hol = isHoliday(ds);
+                if (hol) {
+                    html += '<div class="roster-day" style="background:var(--amber-light);"><div class="font-bold text-sm">' + cell.day + '</div>';
+                    html += '<span style="font-size:0.6rem;color:#92400e;">' + escHtml(hol.name) + '</span></div>';
+                    continue;
+                }
+
+                const dayRoster = STATE.roster[ds] || {};
+                html += '<div class="roster-day"><div class="font-bold text-sm mb-1">' + cell.day + '</div>';
+
+                for (let ti = 0; ti < STATE.tasks.length; ti++) {
+                    const task = STATE.tasks[ti];
+                    const personId = dayRoster[task.name];
+                    if (!personId) continue;
+
+                    // Apply filters
+                    if (ftask.value && ftask.value !== task.name) continue;
+                    if (floc.value && task.location !== floc.value) continue;
+                    if (fperson.value && personId != fperson.value) continue;
+
+                    const name = getPersonName(personId);
+                    html += '<span class="task-badge ' + getTaskColor(ti) + '">' + escHtml(task.name) + ': ' + escHtml(name) + '</span>';
+                }
+                html += '</div>';
+            }
+            html += '</div></div>';
+        }
+        document.getElementById('roster-display').innerHTML = html;
+    }
+
+    // ============================================================
+    // ICS CALENDAR EXPORT
+    // ============================================================
+    function exportICS() {
+        if (!currentUser) return;
+        if (!STATE.roster || Object.keys(STATE.roster).length === 0) {
+            alert('Er is nog geen rooster om te exporteren.');
+            return;
+        }
+
+        let events = [];
+        for (const ds of Object.keys(STATE.roster).sort()) {
+            const dayRoster = STATE.roster[ds];
+            for (const taskName of Object.keys(dayRoster)) {
+                if (dayRoster[taskName] != currentUser.id) continue;
+                const task = STATE.tasks.find(t => t.name === taskName);
+                const loc = task ? task.location : '';
+                events.push({ date: ds, task: taskName, location: loc });
+            }
+        }
+
+        if (events.length === 0) {
+            alert('Geen diensten gevonden voor jou in het huidige rooster.');
+            return;
+        }
+
+        // Build ICS file content
+        let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//RoosterApp//NL\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\nX-WR-CALNAME:Rooster ' + STATE.rosterYear + ' - ' + currentUser.name + '\r\n';
+
+        for (const ev of events) {
+            const dateClean = ev.date.replace(/-/g, '');
+            const uid = 'rooster-' + ev.date + '-' + ev.task.replace(/\s/g, '') + '-' + currentUser.id + '@roosterapp';
+            ics += 'BEGIN:VEVENT\r\n';
+            ics += 'UID:' + uid + '\r\n';
+            ics += 'DTSTART;TZID=Europe/Amsterdam:' + dateClean + 'T080000\r\n';
+            ics += 'DTEND;TZID=Europe/Amsterdam:' + dateClean + 'T170000\r\n';
+            ics += 'SUMMARY:' + ev.task + (ev.location ? ' - ' + ev.location : '') + '\r\n';
+            if (ev.location) ics += 'LOCATION:' + ev.location + '\r\n';
+            ics += 'DESCRIPTION:Rooster ' + STATE.rosterYear + '\\nTaak: ' + ev.task + '\\nLocatie: ' + (ev.location || 'n.v.t.') + '\r\n';
+            ics += 'STATUS:CONFIRMED\r\n';
+            ics += 'BEGIN:VALARM\r\nTRIGGER:-P1D\r\nACTION:DISPLAY\r\nDESCRIPTION:Dienst morgen: ' + ev.task + '\r\nEND:VALARM\r\n';
+            ics += 'END:VEVENT\r\n';
+        }
+        ics += 'END:VCALENDAR\r\n';
+
+        // Download
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'rooster-' + STATE.rosterYear + '-' + currentUser.name.replace(/\s/g, '_') + '.ics';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ============================================================
+    // EXCEL EXPORTS
+    // ============================================================
+    function exportExcelPersonView() {
+        if (!STATE.roster || Object.keys(STATE.roster).length === 0) {
+            alert('Er is nog geen rooster om te exporteren. Genereer eerst een rooster.');
+            return;
+        }
+        const personnel = STATE.personnel.filter(p => !(p.isAdmin && p.name === 'Admin'));
+        const allDays = getAllWeekdays().filter(ds => !isHoliday(ds));
+
+        // Build header row: "Medewerker", then each date
+        const headers = ['Medewerker', 'Doeldagen'];
+        const dateLabels = [];
+        for (const ds of allDays) {
+            const d = parseDate(ds);
+            dateLabels.push(DAY_NAMES[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth()+1));
+            headers.push(dateLabels[dateLabels.length - 1]);
+        }
+
+        const rows = [headers];
+        for (const p of personnel) {
+            const row = [p.name, p.targetDays || ''];
+            for (const ds of allDays) {
+                // Check if person has a task this day
+                const dayRoster = STATE.roster[ds] || {};
+                let cell = '';
+                for (const taskName of Object.keys(dayRoster)) {
+                    if (dayRoster[taskName] === p.id) {
+                        const task = STATE.tasks.find(t => t.name === taskName);
+                        cell = taskName + (task ? ' (' + task.location + ')' : '');
+                        break;
+                    }
+                }
+                // If no task, check if unavailable
+                if (!cell) {
+                    const a = getAvail(p.id, ds);
+                    if (a && a.available === false) {
+                        cell = a.reason ? (REASON_LABELS[a.reason] || a.reason) : 'Niet beschikbaar';
+                    }
+                }
+                row.push(cell);
+            }
+            rows.push(row);
+        }
+
+        // Create workbook with SheetJS
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+
+        // Set column widths
+        ws['!cols'] = [{ wch: 20 }, { wch: 10 }];
+        for (let i = 2; i < headers.length; i++) ws['!cols'].push({ wch: 18 });
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Personeelsoverzicht');
+        XLSX.writeFile(wb, 'rooster-' + STATE.rosterYear + '-personeelsoverzicht.xlsx');
+    }
+
+    function exportExcelTaskView() {
+        if (!STATE.roster || Object.keys(STATE.roster).length === 0) {
+            alert('Er is nog geen rooster om te exporteren. Genereer eerst een rooster.');
+            return;
+        }
+        const personnel = STATE.personnel.filter(p => !(p.isAdmin && p.name === 'Admin'));
+        const allDays = getAllWeekdays().filter(ds => !isHoliday(ds));
+        const personMap = {};
+        for (const p of personnel) personMap[p.id] = p.name;
+
+        // Header: "Datum", then each task
+        const headers = ['Datum', 'Dag'];
+        for (const t of STATE.tasks) headers.push(t.name + ' (' + t.location + ')');
+
+        const rows = [headers];
+        for (const ds of allDays) {
+            const d = parseDate(ds);
+            const row = [ds, DAY_NAMES_FULL[d.getDay()]];
+            for (const task of STATE.tasks) {
+                const dayRoster = STATE.roster[ds] || {};
+                const pid = dayRoster[task.name];
+                row.push(pid ? (personMap[pid] || 'ID:' + pid) : '');
+            }
+            rows.push(row);
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+
+        // Set column widths
+        ws['!cols'] = [{ wch: 12 }, { wch: 12 }];
+        for (let i = 2; i < headers.length; i++) ws['!cols'].push({ wch: 20 });
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Taakenoverzicht');
+        XLSX.writeFile(wb, 'rooster-' + STATE.rosterYear + '-taakenoverzicht.xlsx');
+    }
+
+    // ============================================================
+    // SETTINGS
+    // ============================================================
+    function loadSettings() {
+        document.getElementById('set-year').value = STATE.rosterYear;
+    }
+
+    function saveSettings() {
+        STATE.rosterYear = parseInt(document.getElementById('set-year').value) || 2027;
+        calYear = STATE.rosterYear;
+        save();
+        alert('Instellingen opgeslagen!');
+    }
+
+    // ============================================================
+    // DATA MANAGEMENT
+    // ============================================================
+    function exportData() {
+        const blob = new Blob([JSON.stringify(STATE, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'rooster-backup-' + new Date().toISOString().split('T')[0] + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                for (const key of Object.keys(data)) {
+                    if (data[key] !== undefined) STATE[key] = data[key];
+                }
+                save();
+                alert('Gegevens succesvol geïmporteerd!');
+                if (currentUser) showMainView();
+            } catch(err) {
+                alert('Import fout: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // ============================================================
+    // KEYBOARD / ENTER
+    // ============================================================
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !currentUser) doLogin();
+    });
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    const APP_VERSION = '7.0';
+
+    async function init() {
+        document.getElementById('app-loading').classList.add('hidden');
+
+        // Check if Supabase was previously configured
+        const sbConfig = getSupabaseConfig();
+        if (sbConfig && sbConfig.url && sbConfig.key) {
+            try {
+                // Quick test first with direct REST
+                await testSupabaseConnection(sbConfig.url, sbConfig.key);
+                initSupabaseClient(sbConfig.url, sbConfig.key);
+                await loadFromSupabase();
+                startRealtimeSync();
+                updateSyncIndicator();
+                document.getElementById('app').classList.remove('hidden');
+                showLoginView();
+            } catch(e) {
+                console.warn('Supabase reconnect failed:', e);
+                // Offer to retry or go offline
+                document.getElementById('view-setup').classList.remove('hidden');
+                document.getElementById('setup-url').value = sbConfig.url;
+                document.getElementById('setup-key').value = sbConfig.key;
+            }
+        } else {
+            document.getElementById('view-setup').classList.remove('hidden');
+        }
+    }
+
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    </script>
+
+</body>
+</html>
