@@ -1,0 +1,47 @@
+[
+  {
+    "pmid": "41421912",
+    "doi": "10.1016/j.jcjq.2025.11.006",
+    "title": "Suboptimal Diagnostic Decisions In Hospitalized Patients with Fever: A Prospective Record Review with Physician Interviews",
+    "journal": "Joint Commission Journal on Quality and Patient Safety",
+    "year": 2025,
+    "authors": "Hooftman J, Sikkens JJ, van Wingerden N, Beekman DG, de Bruijne MC, Wagner C, Zwaan L",
+    "snippet": "Diagnostic decisions in hospital care are surprisingly often suboptimal — but not always for the wrong reasons. In a study of 53 febrile inpatients, physician interviews revealed that many initially flagged decisions had legitimate clinical reasoning behind them. Still, cases with more suboptimal decisions showed significantly higher rates of diagnostic error, underscoring the value of structured feedback and interview-based review in improving diagnostic safety."
+  },
+  {
+    "pmid": "41661990",
+    "doi": "10.1371/journal.pmen.0000333",
+    "title": "Mental Health of Health Care Workers During and After the COVID-19 Pandemic — A Longitudinal Cohort Study",
+    "journal": "PLOS Mental Health",
+    "year": 2025,
+    "authors": "Lavell AHA, Sikkens JJ, Buis DTP, Smulders YM, Vinkers CH, Bomers MK, Tijdink JK",
+    "snippet": "Healthcare workers faced measurably worse mental health during the COVID-19 pandemic, with depression, anxiety, and PTSD symptoms peaking around December 2021. This two-year longitudinal follow-up of 384 hospital staff found that symptoms returned to baseline by early 2023 as pandemic pressures eased — a testament to the resilience of this population, and a call for timely support during future healthcare crises."
+  },
+  {
+    "pmid": "41132085",
+    "doi": "10.1093/ehjqcco/qcaf128",
+    "title": "The Bleeding Costs of Intensive Versus Less Intensive Antithrombotic Strategies: A Meta-Regression Analysis",
+    "journal": "European Heart Journal — Quality of Care & Clinical Outcomes",
+    "year": 2025,
+    "authors": "Deurvorst SE, El-Hage EME, van Wingerden N, Ziesemer KA, Sikkens JJ, Smulders YM",
+    "snippet": "How much bleeding risk comes with more aggressive blood-thinning therapy? This meta-regression of 50 trials and over 350,000 patients shows that with contemporary antithrombotic regimens, intensification no longer significantly raises the risk of brain hemorrhage — but fatal bleeding remains a persistent trade-off. The analysis provides a practical benchmark for evaluating the risk-benefit balance of future antithrombotic strategies."
+  },
+  {
+    "pmid": "41022731",
+    "doi": "10.1038/s41467-025-63611-y",
+    "title": "Effect of the Gut Microbiota-Derived Tryptophan Metabolite Indole-3-Acetic Acid in Pneumonia",
+    "journal": "Nature Communications",
+    "year": 2025,
+    "authors": "Kullberg RFJ, van Linge CCA, Haak BW, et al. (incl. Sikkens JJ)",
+    "snippet": "A metabolite produced by gut bacteria — indole-3-acetic acid (IAA) — turns out to worsen rather than protect against pneumonia. Across a large population cohort, critically ill patients, and mouse experiments, higher IAA levels consistently predicted worse outcomes, acting through the aryl hydrocarbon receptor in immune cells. The finding challenges the assumption that gut-derived indoles are uniformly beneficial and highlights context-dependent effects of the microbiome."
+  },
+  {
+    "pmid": "39588855",
+    "doi": "10.1515/dx-2024-0117",
+    "title": "Trends of Diagnostic Adverse Events in Hospital Deaths: Longitudinal Analyses of Four Retrospective Record Review Studies",
+    "journal": "Diagnosis (Berlin)",
+    "year": 2024,
+    "authors": "Hooftman J, Zwaan L, Sikkens JJ, Schouten B, de Bruijne MC, Wagner C",
+    "snippet": "Diagnostic errors that cause patient harm declined in Dutch hospitals between 2008 and 2012 — but have barely improved since. Analysing nearly 11,000 patient records across four national studies, this paper shows that diagnostic adverse events remain more preventable than other types of medical errors and are disproportionately linked to preventable deaths, making them a high-priority target for patient safety improvement."
+  }
+]
