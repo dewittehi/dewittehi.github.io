@@ -4,6 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jonne Sikkens — Internist &amp; Clinical Researcher</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://jonnesikkens.nl/" />
+  <meta property="og:title"       content="Jonne Sikkens — Internist &amp; Clinical Researcher" />
+  <meta property="og:description" content="Personal site of Jonne Sikkens, internist and clinical researcher at Amsterdam UMC. Includes recent publications, Bayesian diagnostic tools, and PhD thesis." />
+  <meta property="og:image"       content="https://jonnesikkens.nl/IMG_1505.jpeg" />
+  <meta property="og:image:width"  content="800" />
+  <meta property="og:image:height" content="800" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Jonne Sikkens — Internist &amp; Clinical Researcher" />
+  <meta name="twitter:description" content="Internist and clinical researcher at Amsterdam UMC. Research tools, recent publications, and more." />
+  <meta name="twitter:image"       content="https://jonnesikkens.nl/IMG_1505.jpeg" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
@@ -286,9 +305,10 @@
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1.1rem 1.25rem;
+      padding: 0;
       box-shadow: var(--shadow);
       transition: box-shadow .2s;
+      overflow: hidden;
     }
 
     .tool-card:hover {
@@ -314,6 +334,20 @@
       font-size: .82rem;
       font-weight: 500;
       color: var(--teal);
+    }
+
+    .tool-thumb {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      object-position: top;
+      border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+      display: block;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tool-card-body {
+      padding: 1.1rem 1.25rem;
     }
 
     /* ── Other links ── */
@@ -428,13 +462,14 @@
 <!-- Hero -->
 <header class="hero">
   <div class="container">
-    <img src="Jonne foto2.png" alt="Jonne Sikkens" class="hero-photo" />
+    <img src="IMG_1505.jpeg" alt="Jonne Sikkens" class="hero-photo" />
     <div class="hero-text">
       <h1>Jonne Sikkens</h1>
       <p class="role">Internist · Clinical Researcher · Amsterdam UMC</p>
       <p class="bio">
-        I work as an internist acute medicine & infectious diseases; clinical epidemiologist and clinical researcher at Amsterdam UMC, with a focus on
-        diagnostic safety, pharmacology, infectious diseases, and clinical decision-making. 
+        I work as an internist and clinical researcher at Amsterdam UMC, with a focus on
+        diagnostic safety, infectious diseases, and clinical decision-making. My research
+        spans from bedside diagnostic reasoning to Bayesian approaches in medicine.
       </p>
       <div class="hero-links">
         <a class="btn btn-outline-light" href="https://www.ncbi.nlm.nih.gov/pubmed/?term=sikkens%20jj%5BAuthor%5D&cmd=DetailsSearch" target="_blank">
@@ -469,33 +504,48 @@
     <div class="tools-grid">
 
       <div class="tool-card">
-        <h3>Bayes Basic</h3>
-        <p>Calculate post-test probabilities in clinical diagnostic situations using Bayes' theorem.</p>
-        <a class="tool-link" href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">Open tool →</a>
+        <img src="screenshots/thumb_bayesbasic.png" alt="Bayes Basic preview" class="tool-thumb" />
+        <div class="tool-card-body">
+          <h3>Bayes Basic</h3>
+          <p>Calculate post-test probabilities in clinical diagnostic situations using Bayes' theorem.</p>
+          <a class="tool-link" href="https://jonne.shinyapps.io/BayesBasic/" target="_blank">Open tool →</a>
+        </div>
       </div>
 
       <div class="tool-card">
-        <h3>New Trial Interpretation</h3>
-        <p>How much new information does a study provide about the probability of your null hypothesis? Interpret new results in light of prior evidence.</p>
-        <a class="tool-link" href="https://jonne.shinyapps.io/MinimalBayesFactor/" target="_blank">Open tool →</a>
+        <img src="screenshots/thumb_minimalbayes.png" alt="New Trial Interpretation preview" class="tool-thumb" />
+        <div class="tool-card-body">
+          <h3>New Trial Interpretation</h3>
+          <p>How much new information does a study provide about the probability of your null hypothesis? Interpret new results in light of prior evidence.</p>
+          <a class="tool-link" href="https://jonne.shinyapps.io/MinimalBayesFactor/" target="_blank">Open tool →</a>
+        </div>
       </div>
 
       <div class="tool-card">
-        <h3>Bayes Reversed</h3>
-        <p>Calculate negative test percentages based on the maximum number of sick patients you're willing to miss. Based on a <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891" target="_blank">PLoS ONE publication</a>.</p>
-        <a class="tool-link" href="https://jonne.shinyapps.io/BayesReverse/" target="_blank">Open tool →</a>
+        <img src="screenshots/thumb_bayesreverse.png" alt="Bayes Reversed preview" class="tool-thumb" />
+        <div class="tool-card-body">
+          <h3>Bayes Reversed</h3>
+          <p>Calculate negative test percentages based on the maximum number of sick patients you're willing to miss. Based on a <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0150891" target="_blank">PLoS ONE publication</a>.</p>
+          <a class="tool-link" href="https://jonne.shinyapps.io/BayesReverse/" target="_blank">Open tool →</a>
+        </div>
       </div>
 
       <div class="tool-card">
-        <h3>Scans &amp; Positivity</h3>
-        <p>Explore the relationship between ordering more scans and scan positivity rates, illustrated through Bayes' theorem.</p>
-        <a class="tool-link" href="https://jonne.shinyapps.io/Bayes_how_many_CTs/" target="_blank">Open tool →</a>
+        <img src="screenshots/thumb_howmanycts.png" alt="Scans and Positivity preview" class="tool-thumb" />
+        <div class="tool-card-body">
+          <h3>Scans &amp; Positivity</h3>
+          <p>Explore the relationship between ordering more scans and scan positivity rates, illustrated through Bayes' theorem.</p>
+          <a class="tool-link" href="https://jonne.shinyapps.io/Bayes_how_many_CTs/" target="_blank">Open tool →</a>
+        </div>
       </div>
 
       <div class="tool-card">
-        <h3>Common Descriptives</h3>
-        <p>Visualise the influence of skewed distributions on the mean, median, and other common descriptive statistics.</p>
-        <a class="tool-link" href="https://jonne.shinyapps.io/Descriptives/" target="_blank">Open tool →</a>
+        <img src="screenshots/thumb_descriptives.png" alt="Common Descriptives preview" class="tool-thumb" />
+        <div class="tool-card-body">
+          <h3>Common Descriptives</h3>
+          <p>Visualise the influence of skewed distributions on the mean, median, and other common descriptive statistics.</p>
+          <a class="tool-link" href="https://jonne.shinyapps.io/Descriptives/" target="_blank">Open tool →</a>
+        </div>
       </div>
 
     </div>
